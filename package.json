@@ -1,0 +1,40 @@
+{
+  "name": "lending-walkthrough",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.4.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint:iris": "node scripts/lint-iris.mjs",
+    "check:insignia": "node scripts/check-insignia.mjs",
+    "seed": "pnpm --filter @lending/seeds run seed",
+    "e2e": "pnpm --filter @lending/e2e run test:e2e"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.4",
+    "@jeswr/solid-showcase-kit": "^0.1.0",
+    "turbo": "^2.10.4",
+    "typescript": "^6.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@jeswr/solid-showcase": "file:./vendor/jeswr-solid-showcase-0.1.0.tgz",
+      "@jeswr/solid-showcase-kit": "file:./vendor/jeswr-solid-showcase-kit-0.1.0.tgz",
+      "@jeswr/solid-pod-guard": "file:./vendor/jeswr-solid-pod-guard-0.1.0.tgz",
+      "@jeswr/synthetic-rdf": "file:./vendor/jeswr-synthetic-rdf-0.1.0.tgz",
+      "@jeswr/solid-seed": "file:./vendor/jeswr-solid-seed-0.1.0.tgz",
+      "@jeswr/app-shell": "file:./vendor/jeswr-app-shell-0.1.0.tgz",
+      "@jeswr/guarded-fetch": "file:./vendor/jeswr-guarded-fetch-0.1.0.tgz",
+      "@jeswr/solid-api-auth": "file:./vendor/jeswr-solid-api-auth-0.1.0.tgz",
+      "@jeswr/rdf-serialize": "file:./vendor/jeswr-rdf-serialize-0.1.0.tgz"
+    }
+  }
+}

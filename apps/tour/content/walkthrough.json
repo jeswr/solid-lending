@@ -1,0 +1,696 @@
+{
+  "anchors": [
+    {
+      "id": "market-scale",
+      "value": "$276B",
+      "label": "record unsecured personal-loan balances, 26.4M consumers (Q4 2025)",
+      "detail": "TransUnion's Q4 2025 Credit Industry Insights reports record unsecured personal-loan balances across 26.4M consumers, with subprime borrowers leading growth.",
+      "source": {
+        "name": "TransUnion data via Motley Fool Money research",
+        "url": "https://www.fool.com/money/research/personal-loan-statistics/"
+      }
+    },
+    {
+      "id": "payday-apr",
+      "value": "391%",
+      "label": "typical payday APR — the market thin-file borrowers get left to",
+      "detail": "Pew's small-dollar lending research: 12M Americans a year average eight payday loans of $375 and $520 in fees, at a typical 391% APR.",
+      "source": {
+        "name": "Pew Charitable Trusts",
+        "url": "https://www.pew.org/-/media/legacy/uploadedfiles/pcs_assets/2012/pewpaydaylendingexecsummarypdf.pdf"
+      }
+    },
+    {
+      "id": "thin-file",
+      "value": "~1 in 3",
+      "label": "US adults with thin or no credit file",
+      "detail": "FinRegLab estimates about one-third of US adults have thin or no credit files — the population bureau-only underwriting cannot see.",
+      "source": {
+        "name": "FinRegLab",
+        "url": "https://finreglab.org/research/the-use-of-cash-flow-data-in-underwriting-credit-empirical-research-findings/"
+      }
+    },
+    {
+      "id": "cashflow-lift",
+      "value": "+28%",
+      "label": "approvals at flat risk with consortium cash-flow scoring",
+      "detail": "Prism Data's fourth-generation consortium cash-flow score reports 28% more approvals without increasing risk, or 16% fewer defaults at flat approvals.",
+      "source": {
+        "name": "Prism Data",
+        "url": "https://www.prweb.com/releases/prism-data-introduces-cashscore-v4-raising-the-bar-for-cash-flow-underwriting-tools-as-the-us-adopts-open-banking-302281511.html"
+      }
+    },
+    {
+      "id": "breach",
+      "value": "147M",
+      "label": "people exposed in the 2017 credit-bureau breach",
+      "detail": "The 2017 credit-bureau breach exposed 147M people and settled for up to $700M — the custody-failure lesson the borrower-held vault answers.",
+      "source": {
+        "name": "FTC",
+        "url": "https://www.ftc.gov/news-events/news/press-releases/2019/07/equifax-pay-575-million-part-settlement-ftc-cfpb-states-related-2017-data-breach"
+      }
+    },
+    {
+      "id": "instant",
+      "value": "≤30 min",
+      "label": "push-to-card funding vs up to 7 days at a traditional bank",
+      "detail": "Push-to-card rails deliver loan proceeds to any debit card in 30 minutes or less; a traditional bank transfer can take up to seven days.",
+      "source": {
+        "name": "TabaPay",
+        "url": "https://tabapay.com/blog/rtp-the-future-of-instant-payments-in-north-america"
+      }
+    }
+  ],
+  "branding": {
+    "aboutHref": "/",
+    "bannedMarks": [
+      {
+        "pattern": "\\bFDIC\\b",
+        "reason": "Deposit-insurance marks and insured-status claims bind any person (12 U.S.C. § 1828(a)(4)) and must never render on a demo surface."
+      },
+      {
+        "pattern": "\\bfederal\\s+deposit\\s+insurance\\b",
+        "reason": "Deposit-insurance marks and insured-status claims bind any person (12 U.S.C. § 1828(a)(4)) and must never render on a demo surface."
+      },
+      {
+        "pattern": "\\bNMLS\\b",
+        "reason": "Licensing-registry identifiers (real or invented) read as licensure credentials and must never render on a demo surface."
+      },
+      {
+        "pattern": "\\bFICO\\b",
+        "reason": "The bureau-score product mark is a third-party trademark — demo copy says 'bureau score'."
+      },
+      {
+        "pattern": "\\bCashScore\\b",
+        "reason": "The cash-flow-score product mark is a third-party trademark — demo copy says 'cash-flow score'."
+      },
+      {
+        "pattern": "\\b(?:Standby\\s+Cash|Balance\\s+Assist|Sigma\\s+Synthetic)\\b",
+        "reason": "Named third-party product marks stay out of demo copy — describe the mechanism, never the branded product."
+      },
+      {
+        "pattern": "(?:fifth\\s+third|equifax|oportun|mastercard|verizon|socure|prism\\s+data|the\\s+work\\s+number|gleif)[\\s'’]+(?:logo|logos|seal|seals|wordmark|wordmarks|insignia|badge|badges|brandmark|brandmarks|trade\\s+dress)",
+        "reason": "Organisation logos, seals, and wordmarks must never render — organisations are named only in role-first 'modelled on' text."
+      }
+    ],
+    "convener": "EDMA Solid Community of Practice",
+    "description": "show how a multi-party small-dollar lending journey could run on personal data stores",
+    "domainNegations": [
+      "Nothing here is an offer of credit, a loan, or financial advice.",
+      "No real credit decisions are made, no consumer reports are pulled, and no money moves."
+    ]
+  },
+  "chapters": [
+    {
+      "anchor": "Consumer-permissioned cash-flow scores already flow through FCRA-regulated consumer-reporting rails, and the FDX open-banking API carries 130M+ consumer account connections — the data rails this scene dramatizes exist today.",
+      "lead": "Maya's vault starts empty. Three issuer flows write verifiable credentials into it — identity, employment and income, and bank cash-flow with a derived score — issued once, reusable for every lender she will ever shop.",
+      "scene": 1,
+      "slug": "fill-the-vault",
+      "steps": [
+        {
+          "body": "Maya's pod holds nothing yet. The vault shows an empty credential shelf, a grants panel, and a consent-receipt ledger — every access any party is ever given will be scoped, receipted, and revocable here.",
+          "title": "Open the Data Vault",
+          "tryLive": {
+            "app": "wallet",
+            "label": "Open the Data Vault"
+          }
+        },
+        {
+          "body": "The Verification Center's identity flow (modelled on Socure) runs the know-your-customer check every lender would otherwise repeat, then signs an identity credential into the vault. Done once, strongly — no application form will ever re-collect it.",
+          "title": "Verify identity once, strongly",
+          "tryLive": {
+            "app": "verifications",
+            "label": "Run the identity flow"
+          }
+        },
+        {
+          "body": "An instant employment-and-income credential (modelled on The Work Number) lands beside it: employer, tenure, and net monthly deposits of $2,860 across her two income streams — payroll-attested, with freshness carried by validity dates instead of re-collection.",
+          "title": "Attest employment and income",
+          "tryLive": {
+            "app": "verifications",
+            "label": "Issue the income credential"
+          }
+        },
+        {
+          "body": "Maya permissions her bank data through an open-banking connection (modelled on Mastercard Open Banking). An FDX-shaped cash-flow credential records her deposit streams, balances, and zero NSF events in 90 days; a consortium scorer (modelled on Prism Data) derives a cash-flow score of 720.",
+          "title": "Connect the bank, derive the score",
+          "tryLive": {
+            "app": "verifications",
+            "label": "Connect bank data"
+          }
+        },
+        {
+          "body": "The Credit File issues her traditional score too: 612, from a thin file of two tradelines and 14 months — the number that, alone, prices her out. Both rails now sit in the vault, side by side.",
+          "title": "File the traditional score",
+          "tryLive": {
+            "app": "bureau",
+            "label": "Issue the bureau score"
+          }
+        }
+      ],
+      "title": "Fill the vault",
+      "underneath": [
+        "Each credential is a W3C Verifiable Credential 2.0 (JSON-LD), signed by its issuer, bound to Maya as holder, and written into her pod over an authenticated Solid write.",
+        "Freshness is carried by validFrom/validUntil plus a Bitstring Status List entry — re-presenting later means a seconds-long status check, never re-verification.",
+        "The cash-flow credential's attribute set follows FDX API semantics, so any lender that reads the open-banking standard can consume it."
+      ],
+      "underneathRequired": true
+    },
+    {
+      "anchor": "Near-prime shoppers who fail bureau-only pre-qualification are left to a payday market whose typical APR is 391% — and every conventional pre-qual form re-collects identity and income before saying no.",
+      "lead": "Maya rate-shops two competing lenders without handing either one anything. A zero-knowledge proof shows she clears their thresholds — no name, no identifiers, no credit pull, no copies left behind.",
+      "scene": 2,
+      "slug": "shop-without-stripping",
+      "steps": [
+        {
+          "body": "The Personal Loan Desk's pre-qualification asks for three predicates, not a form: monthly income at least $2,200, cash-flow score at least 660, zero NSF events in 90 days. Maya's vault answers with a proof — the desk learns true, and nothing else — and returns a priced pre-qual offer.",
+          "title": "Ask the bank for a pre-qual",
+          "tryLive": {
+            "app": "bank-lender",
+            "label": "Open the Personal Loan Desk"
+          }
+        },
+        {
+          "body": "Installment Lending verifies the same zero-knowledge proof and returns its own priced offer. Two competing quotes — and neither lender holds her identity, her payroll history, or her bank transactions. The shopping trail evaporates instead of accumulating.",
+          "title": "Shop the fintech with the same proof",
+          "tryLive": {
+            "app": "fintech-lender",
+            "label": "Open Installment Lending"
+          }
+        },
+        {
+          "body": "Both offers land in the vault side by side. The grants panel still shows zero data grants: shopping cost Maya nothing in surrendered data — against a market where every pre-qual form takes a copy and keeps it.",
+          "title": "Compare offers from the vault",
+          "tryLive": {
+            "app": "wallet",
+            "label": "Compare the offers"
+          }
+        }
+      ],
+      "title": "Shop without stripping",
+      "underneath": [
+        "The proof is a zero-knowledge predicate proof over the income, cash-flow, and score credentials: it demonstrates the threshold facts without disclosing underlying values or identifiers.",
+        "Zero-knowledge is scoped to shopping by design: once Maya chooses a lender, regulated disclosures need actual figures, so the application phase switches to granted credential access.",
+        "The verifying lender checks issuer signatures and credential status — trust comes from the issuers' keys, not from re-collecting the borrower's data."
+      ],
+      "underneathRequired": true
+    },
+    {
+      "anchor": "Independent research found cash-flow variables predictive of credit risk on their own and additive to bureau data, with consortium cash-flow scoring reporting +28% approvals at flat risk — while adverse action and closed-end disclosures stay governed by Reg B and Reg Z.",
+      "lead": "Maya picks the fintech lender. The same borrower, the same data, decisioned two ways on screen: the bureau-only model prices her out; bureau plus cash-flow approves her in seconds.",
+      "scene": 3,
+      "slug": "one-decision-two-models",
+      "steps": [
+        {
+          "body": "Maya grants Installment Lending scoped, time-boxed read access to her credentials. The application prefills from the vault — identity, income, cash flow — and a consent receipt lands in her ledger before the lender reads a byte.",
+          "title": "Grant once, apply prefilled",
+          "tryLive": {
+            "app": "fintech-lender",
+            "label": "Start the application"
+          }
+        },
+        {
+          "body": "The decisioning screen shows both rails honestly. Bureau-only: a 612 thin file — declined or priced above her ceiling. Bureau plus cash-flow: steady deposits, zero NSF events, score 720 — approved. $2,000 over 18 months at 32.9% APR, decided in seconds.",
+          "title": "Watch the two models decide",
+          "tryLive": {
+            "app": "fintech-lender",
+            "label": "See the two-model decision"
+          }
+        },
+        {
+          "body": "The contrast card renders the Personal Loan Desk's bureau-only outcome as a Reg B adverse-action notice with its specific principal reasons — insufficient credit history, limited tradelines. Honest paperwork for the decline that inclusion just made unnecessary.",
+          "title": "Read the bank's counter-decision",
+          "tryLive": {
+            "app": "bank-lender",
+            "label": "Read the adverse-action notice"
+          }
+        },
+        {
+          "body": "The Reg Z closed-end disclosure — APR, finance charge, amount financed, payment schedule — is delivered into Maya's pod, hers to keep. The regulated paper trail follows the borrower, not the lender's filing cabinet.",
+          "title": "File the disclosure in the vault",
+          "tryLive": {
+            "app": "wallet",
+            "label": "Open the disclosure"
+          }
+        }
+      ],
+      "title": "One decision, two models",
+      "underneath": [
+        "The approval consumed granted verifiable credentials, not re-collected documents — decision time collapses because verification already happened at issuance.",
+        "Every read the lender performed is logged as a consent receipt in the vault, and the grant expires on its own terms.",
+        "The two-model contrast is the demo's thesis made visible: identical data, different underwriting — inclusion is an architecture choice, not a risk giveaway."
+      ],
+      "underneathRequired": true
+    },
+    {
+      "anchor": "Push-to-card rails deliver loan proceeds to a debit card in 30 minutes or less, and 72% of consumers choose instant disbursement when offered — while a traditional bank transfer can take up to seven days.",
+      "lead": "The transmission shop is waiting. Maya grants the disbursement rail one scoped payout, and the money is on her card before she leaves the page — with the receipt in her vault.",
+      "scene": 4,
+      "slug": "funded-in-minutes",
+      "steps": [
+        {
+          "body": "Instant Payout (modelled on Mastercard Send) receives a single-use disbursement grant: loan proceeds to Maya's debit card, nothing else. The rail sees the payment instruction — not her application, her credentials, or her history.",
+          "title": "Authorize the payout",
+          "tryLive": {
+            "app": "disbursement",
+            "label": "Authorize the payout"
+          }
+        },
+        {
+          "body": "The push-to-card payment settles inside the rail's 30-minute window, and a signed disbursement receipt is written back into the vault — timestamping the beat: application to funded, the same afternoon her car broke down.",
+          "title": "Money in minutes, receipt in the pod",
+          "tryLive": {
+            "app": "disbursement",
+            "label": "Watch the payout settle"
+          }
+        },
+        {
+          "body": "The contrast card is blunt: next-day ACH at best, up to seven days at a traditional bank — while the borrower's car sits in the shop. Verified-at-presentation data plus instant rails close the whole loop in minutes.",
+          "title": "Compare the old rail",
+          "tryLive": {
+            "app": "wallet",
+            "label": "See the receipt"
+          }
+        }
+      ],
+      "title": "Funded in minutes"
+    },
+    {
+      "anchor": "The consumer-lending payment provisions of 12 CFR 1041 (in effect since March 2025) bar a third withdrawal attempt after two consecutive failures without fresh authorization, and Reg E forbids conditioning credit on preauthorized electronic repayment.",
+      "lead": "Repayment is a grant Maya can read, on-time payments become a credential that builds her file, and at payoff she revokes the lender's access — in control to the last receipt.",
+      "scene": 5,
+      "slug": "repay-build-stay-in-control",
+      "steps": [
+        {
+          "body": "Autopay is an inspectable, machine-readable policy in the vault, not a buried mandate: amount, schedule, and the payment-protection rails rendered in code — advance notice before the first attempt, and no third attempt after two consecutive failures without fresh authorization.",
+          "title": "Inspect the repayment grant",
+          "tryLive": {
+            "app": "fintech-lender",
+            "label": "Inspect the autopay grant"
+          }
+        },
+        {
+          "body": "Eighteen on-time payments become a repayment-history credential, furnished to the Credit File and held in the vault. The thin file thickens — the graduation beat that turns a first small-dollar loan into a credit history.",
+          "title": "Build the file with every payment",
+          "tryLive": {
+            "app": "bureau",
+            "label": "See the furnished history"
+          }
+        },
+        {
+          "body": "Loan paid, Maya clicks revoke. The lender's bank-data access ends, the repayment grant closes, and the consent-receipt ledger shows the complete, finite history of who saw what. Nothing lingers after payoff.",
+          "title": "Revoke at payoff",
+          "tryLive": {
+            "app": "wallet",
+            "label": "Revoke the lender's access"
+          }
+        },
+        {
+          "body": "The closing beat: her vault is already full. Identity, income, cash-flow, and now repayment history — reusable credentials mean Maya's next application starts where this one finished: verified.",
+          "title": "The next loan is one click",
+          "tryLive": {
+            "app": "wallet",
+            "label": "Back to the full vault"
+          }
+        }
+      ],
+      "title": "Repay, build, stay in control",
+      "underneath": [
+        "The repayment authorization is an ODRL policy with DPV-described purposes; every grant and every revocation writes a consent receipt into the pod.",
+        "Revocation is enforced at the pod's access-control layer — the lender's access simply stops resolving; no goodwill is required.",
+        "The repayment-history credential is issuer-signed by the lender and furnishable to any bureau the borrower permits — portability of the upside, not just the data."
+      ],
+      "underneathRequired": true
+    }
+  ],
+  "compliance": {
+    "title": "Examiner View",
+    "nonAffiliation": "Rendered deliberately unbranded: the public rules below are presented generically. This demonstration is not produced, reviewed, or endorsed by the Consumer Financial Protection Bureau, the Department of Defense, or any other regulator or government agency.",
+    "checks": [
+      {
+        "id": "fcra-permissible-purpose",
+        "rule": "Consumer reports — including cash-flow scores distributed through consumer-reporting rails — may be furnished only on a permissible purpose, and consumer-permissioned pulls must be documented.",
+        "citation": "FCRA § 604 (15 U.S.C. § 1681b)",
+        "citationUrl": "https://www.ftc.gov/legal-library/browse/statutes/fair-credit-reporting-act",
+        "scene": 1,
+        "chapterSlug": "fill-the-vault",
+        "observe": "Every score and report in the vault was issued through an explicit, receipted, consumer-permissioned flow — the permission trail is inspectable in the consent ledger."
+      },
+      {
+        "id": "mla-mapr",
+        "rule": "Loans to covered members of the armed forces and their dependents are capped at a 36% Military Annual Percentage Rate, requiring a covered-borrower check.",
+        "citation": "32 CFR 232 (Military Lending Act)",
+        "citationUrl": "https://www.ecfr.gov/current/title-32/subtitle-A/chapter-I/subchapter-M/part-232",
+        "scene": 2,
+        "chapterSlug": "shop-without-stripping",
+        "observe": "Both pre-qualification offers price under a 36% APR ceiling, and the flow marks where a covered-borrower check would run before an offer becomes an application."
+      },
+      {
+        "id": "reg-z-disclosures",
+        "rule": "Closed-end credit requires disclosures — APR, finance charge, amount financed, and payment schedule — before consummation.",
+        "citation": "Reg Z, 12 CFR §§ 1026.17–18",
+        "citationUrl": "https://www.ecfr.gov/current/title-12/chapter-X/part-1026/section-1026.18",
+        "scene": 3,
+        "chapterSlug": "one-decision-two-models",
+        "observe": "The approval delivers the closed-end disclosure with its required fields into the borrower's pod before the loan is consummated."
+      },
+      {
+        "id": "reg-b-adverse-action",
+        "rule": "A creditor taking adverse action must give a notice stating the specific principal reasons within 30 days.",
+        "citation": "Reg B, 12 CFR § 1002.9",
+        "citationUrl": "https://www.ecfr.gov/current/title-12/chapter-X/part-1002/section-1002.9",
+        "scene": 3,
+        "chapterSlug": "one-decision-two-models",
+        "observe": "The bank's bureau-only counter-decision renders a specific-reasons adverse-action notice — never a vague decline."
+      },
+      {
+        "id": "payday-payment-provisions",
+        "rule": "After two consecutive failed payment-withdrawal attempts, a lender may not initiate a third without fresh authorization, and must give advance notice of the first attempt.",
+        "citation": "12 CFR 1041, subpart C",
+        "citationUrl": "https://www.ecfr.gov/current/title-12/chapter-X/part-1041/subpart-C",
+        "scene": 5,
+        "chapterSlug": "repay-build-stay-in-control",
+        "observe": "The repayment grant encodes advance notice of the first attempt and blocks a third attempt after two consecutive failures until Maya re-authorizes."
+      },
+      {
+        "id": "reg-e-compulsory-use",
+        "rule": "Credit may not be conditioned on repayment by preauthorized electronic fund transfer.",
+        "citation": "Reg E, 12 CFR § 1005.10(e)",
+        "citationUrl": "https://www.ecfr.gov/current/title-12/chapter-X/part-1005/section-1005.10",
+        "scene": 5,
+        "chapterSlug": "repay-build-stay-in-control",
+        "observe": "Autopay is an optional, inspectable, revocable grant — the loan is never conditioned on preauthorized electronic repayment."
+      }
+    ]
+  },
+  "deploy": {
+    "envPrefix": "LENDING",
+    "slug": "lending"
+  },
+  "persona": {
+    "descriptor": "Fictional borrower — every value on this card is simulated; no real personal information appears anywhere in this demo.",
+    "fields": [
+      {
+        "label": "Name",
+        "value": "Maya Torres"
+      },
+      {
+        "label": "Identifier",
+        "note": "Issued by the seed script (seeds/persona.ts)",
+        "value": "MT-0001"
+      },
+      {
+        "copyable": false,
+        "label": "Situation",
+        "value": "27, Columbus OH — needs $2,000 within days for a transmission repair to keep her commute to work"
+      },
+      {
+        "copyable": false,
+        "label": "Work",
+        "value": "W-2 shift supervisor at Brightline Staffing LLC (fictional employer) plus weekend rideshare income"
+      },
+      {
+        "copyable": false,
+        "label": "Credit file",
+        "value": "Thin file: 14 months of history, two tradelines, bureau score 612"
+      },
+      {
+        "copyable": false,
+        "label": "Cash flow",
+        "value": "Net monthly deposits $2,860 across two income streams; 0 NSF events in the last 90 days; cash-flow score 720 (illustrative scale)"
+      },
+      {
+        "copyable": false,
+        "label": "Loan sought",
+        "value": "$2,000 over 18 months, target APR below 36%"
+      },
+      {
+        "copyable": false,
+        "label": "Pod",
+        "value": "Provisioned by pnpm run seed"
+      }
+    ],
+    "footnote": "Values are pinned above the scene-2 proof thresholds (income ≥ $2,200/mo, cash-flow score ≥ 660, NSF₉₀ = 0). Keep this card in sync with seeds/persona.ts — the seeded pod data must match it.",
+    "name": "Maya Torres"
+  },
+  "registry": {
+    "apps": {
+      "tour": {
+        "appName": "Small-Dollar Lending Tour",
+        "healthPath": "/api/health",
+        "modelledOn": "EDMA Solid Community of Practice",
+        "path": "/",
+        "slug": "tour",
+        "theme": {
+          "accent": "oklch(0.72 0.1 250)",
+          "hue": 210,
+          "primary": "oklch(0.42 0.08 210)",
+          "role": "walkthrough shell"
+        }
+      },
+      "wallet": {
+        "appName": "Data Vault",
+        "healthPath": "/wallet/api/health",
+        "honesty": {
+          "real": [
+            "Serves an authenticated pod route guarded by @jeswr/solid-pod-guard (fails closed until an operator configures it)"
+          ],
+          "simulated": [
+            "Every credential, grant, receipt, and balance in this app is scripted demo content for a fictional borrower"
+          ]
+        },
+        "modelledOn": "Verizon",
+        "path": "/wallet",
+        "podRoutes": [
+          "/api/pod/example"
+        ],
+        "slug": "wallet",
+        "theme": {
+          "accent": "oklch(0.72 0.11 250)",
+          "hue": 210,
+          "primary": "oklch(0.45 0.09 210)",
+          "role": "borrower data vault"
+        },
+        "zoneEnv": "LENDING_WALLET_ZONE_URL"
+      },
+      "verifications": {
+        "appName": "Verification Center",
+        "healthPath": "/verifications/api/health",
+        "honesty": {
+          "real": [
+            "Serves an authenticated pod route guarded by @jeswr/solid-pod-guard (fails closed until an operator configures it)"
+          ],
+          "simulated": [
+            "Identity, income, and cash-flow credentials are issued from scripted demo data — no real verification service is called"
+          ]
+        },
+        "modelledOn": "Socure, The Work Number, Mastercard Open Banking, and Prism Data",
+        "path": "/verifications",
+        "podRoutes": [
+          "/api/pod/example"
+        ],
+        "slug": "verifications",
+        "theme": {
+          "accent": "oklch(0.72 0.11 27)",
+          "hue": 347,
+          "primary": "oklch(0.45 0.09 347)",
+          "role": "identity, income, and cash-flow credential issuer"
+        },
+        "zoneEnv": "LENDING_VERIFICATIONS_ZONE_URL"
+      },
+      "bank-lender": {
+        "appName": "Personal Loan Desk",
+        "healthPath": "/bank-lender/api/health",
+        "honesty": {
+          "real": [
+            "Serves an authenticated pod route guarded by @jeswr/solid-pod-guard (fails closed until an operator configures it)"
+          ],
+          "simulated": [
+            "Pre-qualification, bureau-only decisioning, and the adverse-action contrast are scripted demo logic — no credit is offered"
+          ]
+        },
+        "modelledOn": "Fifth Third Bank",
+        "path": "/bank-lender",
+        "podRoutes": [
+          "/api/pod/example"
+        ],
+        "slug": "bank-lender",
+        "theme": {
+          "accent": "oklch(0.72 0.11 164)",
+          "hue": 124,
+          "primary": "oklch(0.45 0.09 124)",
+          "role": "bank installment lender"
+        },
+        "zoneEnv": "LENDING_BANK_LENDER_ZONE_URL"
+      },
+      "fintech-lender": {
+        "appName": "Installment Lending",
+        "healthPath": "/fintech-lender/api/health",
+        "honesty": {
+          "real": [
+            "Serves an authenticated pod route guarded by @jeswr/solid-pod-guard (fails closed until an operator configures it)"
+          ],
+          "simulated": [
+            "Origination, the two-model decision, servicing, and the repayment-history credential are scripted demo logic — no credit is offered"
+          ]
+        },
+        "modelledOn": "Oportun",
+        "path": "/fintech-lender",
+        "podRoutes": [
+          "/api/pod/example"
+        ],
+        "slug": "fintech-lender",
+        "theme": {
+          "accent": "oklch(0.72 0.11 301)",
+          "hue": 261,
+          "primary": "oklch(0.45 0.09 261)",
+          "role": "cash-flow-underwriting installment lender"
+        },
+        "zoneEnv": "LENDING_FINTECH_LENDER_ZONE_URL"
+      },
+      "bureau": {
+        "appName": "Credit File",
+        "healthPath": "/bureau/api/health",
+        "honesty": {
+          "real": [
+            "Serves an authenticated pod route guarded by @jeswr/solid-pod-guard (fails closed until an operator configures it)"
+          ],
+          "simulated": [
+            "The traditional score credential and the furnishing view are scripted demo content — no consumer report exists"
+          ]
+        },
+        "modelledOn": "Equifax",
+        "path": "/bureau",
+        "podRoutes": [
+          "/api/pod/example"
+        ],
+        "slug": "bureau",
+        "theme": {
+          "accent": "oklch(0.72 0.11 78)",
+          "hue": 38,
+          "primary": "oklch(0.45 0.09 38)",
+          "role": "credit bureau"
+        },
+        "zoneEnv": "LENDING_BUREAU_ZONE_URL"
+      },
+      "disbursement": {
+        "appName": "Instant Payout",
+        "healthPath": "/disbursement/api/health",
+        "honesty": {
+          "real": [
+            "Serves an authenticated pod route guarded by @jeswr/solid-pod-guard (fails closed until an operator configures it)"
+          ],
+          "simulated": [
+            "The push-to-card payout and its receipt are scripted demo content — no money moves"
+          ]
+        },
+        "modelledOn": "Mastercard (Send)",
+        "path": "/disbursement",
+        "podRoutes": [
+          "/api/pod/example"
+        ],
+        "slug": "disbursement",
+        "theme": {
+          "accent": "oklch(0.72 0.11 215)",
+          "hue": 175,
+          "primary": "oklch(0.45 0.09 175)",
+          "role": "instant disbursement rail"
+        },
+        "zoneEnv": "LENDING_DISBURSEMENT_ZONE_URL"
+      }
+    },
+    "center": "data-subject",
+    "launcherOrder": [
+      "tour",
+      "wallet",
+      "verifications",
+      "bank-lender",
+      "fintech-lender",
+      "bureau",
+      "disbursement"
+    ],
+    "roles": [
+      {
+        "apps": [
+          "wallet"
+        ],
+        "center": true,
+        "membership": "The borrower — the centre of the ecosystem",
+        "modelledOn": "Verizon",
+        "role": "borrower data vault",
+        "slug": "data-subject",
+        "summary": "Holds Maya's identity, income, cash-flow, and loan records in a pod only she controls — every party gets scoped, receipted, revocable access instead of a copy. The same consumer-scale vault seat carries across showcase verticals."
+      },
+      {
+        "apps": [
+          "verifications"
+        ],
+        "membership": "External approach — no member organisation holds this seat today",
+        "modelledOn": "Socure, The Work Number, Mastercard Open Banking, and Prism Data",
+        "role": "identity, income, and cash-flow credential issuer",
+        "roleNumber": 1,
+        "scene": 1,
+        "slug": "verifications-seat",
+        "summary": "Issues the identity, employment-and-income, bank cash-flow, and cash-flow-score credentials into the vault — verification happens once, at issuance, and is never re-collected per lender."
+      },
+      {
+        "apps": [
+          "bank-lender"
+        ],
+        "membership": "Member and Data Exchange Project founder (internal role map, Jun 2026 — re-verify before outreach)",
+        "modelledOn": "Fifth Third Bank",
+        "role": "bank installment lender",
+        "roleNumber": 2,
+        "scene": 2,
+        "slug": "bank-lender-seat",
+        "summary": "Verifies the zero-knowledge pre-qualification and plays the bureau-only decisioning contrast — a real personal-loan desk at exactly the demo's ticket size, retaining nothing from shoppers who walk away."
+      },
+      {
+        "apps": [
+          "fintech-lender"
+        ],
+        "membership": "External approach — the inclusion story's flagship seat",
+        "modelledOn": "Oportun",
+        "role": "cash-flow-underwriting installment lender",
+        "roleNumber": 3,
+        "scene": 3,
+        "slug": "fintech-lender-seat",
+        "summary": "Runs the full origination on granted credentials — pre-qual, prefilled application, the two-model decision that approves where bureau-only declines, servicing, and the repayment-history credential."
+      },
+      {
+        "apps": [
+          "bureau"
+        ],
+        "membership": "External approach — one approach covers the bureau, income-verification, and cash-flow-score distribution rails",
+        "modelledOn": "Equifax",
+        "role": "credit bureau",
+        "roleNumber": 4,
+        "scene": 3,
+        "slug": "bureau-seat",
+        "summary": "Issues the traditional score credential — the old rail in the two-model contrast — and receives the furnished repayment history that graduates a thin file into a credit history."
+      },
+      {
+        "apps": [
+          "disbursement"
+        ],
+        "membership": "Member per internal role map (re-verify) — the same organisation also holds the open-banking data seat",
+        "modelledOn": "Mastercard (Send)",
+        "role": "instant disbursement rail",
+        "roleNumber": 5,
+        "scene": 4,
+        "slug": "disbursement-seat",
+        "summary": "Executes the push-to-card payout on a single-use grant and writes the signed disbursement receipt back into the vault — it sees the payment instruction, never the application."
+      }
+    ]
+  },
+  "site": {
+    "appName": "Small-Dollar Lending Tour",
+    "exploreCtaLabel": "Explore the ecosystem",
+    "heroLead": "Borrowers keep identity, payroll, and bank history in a vault they control. Lenders decision verified data in seconds — and approve borrowers the bureau file alone would decline.",
+    "heroParagraph": "Follow Maya Torres, a fictional thin-file borrower, through a $2,000 installment loan rebuilt on personal data stores: credentials issued once into a vault she controls, zero-knowledge rate-shopping that leaves no copies behind, a two-model decision that approves where the bureau file alone prices her out, funding in minutes over an instant rail, and repayment that builds her credit file — with every access scoped, receipted, and revocable.",
+    "heroTitle": "A $2,000 decision in minutes — where the winning move is inclusion",
+    "organization": "EDMA Solid Community of Practice",
+    "startCtaLabel": "Start the walkthrough"
+  },
+  "version": 1
+}
