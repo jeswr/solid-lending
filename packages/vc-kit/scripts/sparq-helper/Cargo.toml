@@ -1,0 +1,38 @@
+# sm-26 — native seed-time helper binary driving sparq's ZK issuance tooling.
+#
+# This crate is NOT part of the pnpm/turbo build. It is compiled on demand by
+# scripts/capture-fixtures.mjs (and the seed-tooling native bridge) against a
+# LOCAL sparq checkout, located via the `.sparq` symlink the bridge creates from
+# the SPARQ_CHECKOUT environment variable. Nothing here reimplements crypto:
+# Poseidon2 commitments, Schnorr-over-Baby-JubJub signatures, term encodings,
+# Merkle roots and Prover.toml rendering all come from sparq's own crates
+# (decision 0004/0012: do NOT port Poseidon2/Schnorr to JS).
+[package]
+name = "sparq-seed-helper"
+version = "0.0.0"
+edition = "2021"
+publish = false
+license = "UNLICENSED"
+
+# Standalone workspace: keep cargo from walking up into unrelated manifests.
+# `.sparq` (the sparq-checkout symlink) is excluded so the path deps resolve
+# against sparq's OWN workspace (workspace-inherited fields, [patch] et al)
+# rather than being adopted into this one.
+[workspace]
+exclude = [".sparq"]
+
+[dependencies]
+sparq-zk = { path = ".sparq/crates/sparq-zk" }
+sparq-zk-compose = { path = ".sparq/crates/sparq-zk-compose" }
+# Same major pins as the sparq workspace (its Cargo.toml [workspace.dependencies])
+# so oxrdf term types unify with sparq-zk's.
+oxrdf = { version = "0.3", features = ["rdf-12"] }
+oxttl = { version = "0.2", features = ["rdf-12"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Mirror the sparq workspace's [patch.crates-io]: sparq-core depends on the
+# vendored spargebra (W3C-conformance parser fixes). A path-dep build from
+# outside that workspace must replicate the patch or resolution fails/diverges.
+[patch.crates-io]
+spargebra = { path = ".sparq/vendor/spargebra" }

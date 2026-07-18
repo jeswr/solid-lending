@@ -1,0 +1,51 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dpv: <https://w3id.org/dpv#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix lshape: <urn:example:lend-shape#> .
+
+# APP-LEVEL receipt (the mortgage demo's consent-ledger pattern carried
+# over): WAC enforces the access change; neither WAC nor the Solid protocol
+# is represented as an audit provider. Scene 5's revocation ledger renders
+# these receipts.
+lshape:ConsentReceiptShape
+  a sh:NodeShape ;
+  sh:targetClass dpv:ConsentReceipt ;
+  sh:closed true ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue dpv:ConsentReceipt ;
+  ] ;
+  sh:property [
+    sh:path dpv:hasDataSubject ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+  sh:property [
+    sh:path dpv:hasDataController ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+  sh:property [
+    sh:path odrl:target ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+  sh:property [
+    sh:path dpv:hasConsentStatus ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( dpv:ConsentGiven dpv:ConsentWithdrawn ) ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+  sh:property [
+    sh:path dcterms:issued ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:dateTime ;
+  ] .

@@ -1,0 +1,17 @@
+@prefix cred: <https://www.w3.org/2018/credentials#>.
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix dpv: <https://w3id.org/dpv#>.
+@prefix fibo-loan-ln-ln: <https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/>.
+@prefix fibo-loan-spc-cns: <https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansSpecific/ConsumerLoans/>.
+@prefix lend: <urn:example:lend#>.
+@prefix odrl: <http://www.w3.org/ns/odrl/2/>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
+@prefix schema: <https://schema.org/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+<https://maya.pod.example/lending/receipts/1> a dpv:ConsentReceipt;
+    dpv:hasDataSubject <https://maya.pod.example/profile/card#me>;
+    dpv:hasDataController <https://fintech-lender.example/orgs/installment-lending#id>;
+    odrl:target <https://maya.pod.example/lending/credentials/bank-cash-flow>;
+    dpv:hasConsentStatus dpv:ConsentRequested;
+    dcterms:issued "2026-07-15T12:00:00.000Z"^^xsd:dateTime.

@@ -1,0 +1,31 @@
+{
+  "name": "@lending/vc-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "securityCritical": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./seed-tooling": "./src/seed-tooling/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "capture:fixtures": "node scripts/capture-fixtures.mjs"
+  },
+  "dependencies": {
+    "@jeswr/solid-vc": "github:jeswr/solid-vc#bee27d508372e64021e23bdaeb2d79c06e08cf18",
+    "@lending/data-model": "workspace:*",
+    "@rdfjs/types": "^2.0.1",
+    "@rdfjs/wrapper": "^0.34.0",
+    "n3": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/n3": "^1.26.1",
+    "@types/node": "^25.9.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
