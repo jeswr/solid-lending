@@ -19,9 +19,12 @@ document, with a skeleton app per ecosystem seat.
 | `apps/bureau` | Credit File | credit bureau |
 | `apps/disbursement` | Instant Payout | instant disbursement rail |
 
-Plus `packages/data-model` (SHACL shapes + vocab stub), `seeds/` (deterministic
-persona seeding via @jeswr/synthetic-rdf + @jeswr/solid-seed), `e2e/` (Playwright
-disclaimer + axe gates), and `scripts/` (IRI + insignia lints).
+Plus `packages/data-model` (SHACL shapes + vocab stub), `packages/vc-kit`
+(verifiable-credential issue/verify), `packages/test-kit` (the dev/test Solid-server
+harness), `seeds/` (Maya Torres's real signed lending credentials + ZK operand anchors,
+via @lending/vc-kit + @jeswr/solid-seed — plus the original deterministic persona-card
+seed via @jeswr/synthetic-rdf), `e2e/` (Playwright disclaimer + axe gates, plus a
+pre-seeded borrower pod per run), and `scripts/` (IRI + insignia lints, `dev-pod.ts`).
 
 ## The single edit surface
 

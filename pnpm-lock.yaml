@@ -14,6 +14,7 @@ overrides:
   '@jeswr/guarded-fetch': file:./vendor/jeswr-guarded-fetch-0.1.0.tgz
   '@jeswr/solid-api-auth': file:./vendor/jeswr-solid-api-auth-0.1.0.tgz
   '@jeswr/rdf-serialize': file:./vendor/jeswr-rdf-serialize-0.1.0.tgz
+  '@jeswr/solid-server': file:./vendor/jeswr-solid-server-0.1.0.tgz
 
 importers:
 
@@ -25,6 +26,15 @@ importers:
       '@jeswr/solid-showcase-kit':
         specifier: file:vendor/jeswr-solid-showcase-kit-0.1.0.tgz
         version: file:vendor/jeswr-solid-showcase-kit-0.1.0.tgz(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@lending/seeds':
+        specifier: workspace:*
+        version: link:seeds
+      '@lending/test-kit':
+        specifier: workspace:*
+        version: link:packages/test-kit
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.5
       turbo:
         specifier: ^2.10.4
         version: 2.10.5
@@ -316,6 +326,9 @@ importers:
       '@lending/app-tour':
         specifier: workspace:*
         version: link:../tour
+      '@lending/seeds':
+        specifier: workspace:*
+        version: link:../../seeds
       next:
         specifier: ^16.2.10
         version: 16.2.10(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -362,6 +375,12 @@ importers:
       '@lending/app-tour':
         specifier: workspace:*
         version: link:../apps/tour
+      '@lending/seeds':
+        specifier: workspace:*
+        version: link:../seeds
+      '@lending/test-kit':
+        specifier: workspace:*
+        version: link:../packages/test-kit
       '@playwright/test':
         specifier: ^1.59.1
         version: 1.61.1
@@ -399,6 +418,28 @@ importers:
       '@types/n3':
         specifier: ^1.26.1
         version: 1.26.1
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.5
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.10(@types/node@25.9.5)(vite@8.1.5(@types/node@25.9.5)(jiti@2.7.0))
+
+  packages/test-kit:
+    dependencies:
+      '@jeswr/solid-server':
+        specifier: file:../../vendor/jeswr-solid-server-0.1.0.tgz
+        version: file:vendor/jeswr-solid-server-0.1.0.tgz
+      get-port:
+        specifier: ^7.1.0
+        version: 7.2.0
+      jose:
+        specifier: ^5.10.0
+        version: 5.10.0
+    devDependencies:
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.5
@@ -457,6 +498,9 @@ importers:
       '@lending/data-model':
         specifier: workspace:*
         version: link:../packages/data-model
+      '@lending/vc-kit':
+        specifier: workspace:*
+        version: link:../packages/vc-kit
       n3:
         specifier: ^2.0.3
         version: 2.1.1
@@ -464,6 +508,9 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
     devDependencies:
+      '@lending/test-kit':
+        specifier: workspace:*
+        version: link:../packages/test-kit
       '@rdfjs/types':
         specifier: ^2.0.1
         version: 2.0.1
@@ -1531,6 +1578,12 @@ packages:
     version: 0.1.0
     engines: {node: '>=24'}
 
+  '@jeswr/solid-server@file:vendor/jeswr-solid-server-0.1.0.tgz':
+    resolution: {integrity: sha512-cMh1ckDWspn8GqHJWhL1obqCNBa8x52fNUIrQfd3Z1LYNVLE5coN51NJymFyLXteEoc2stexlz8s5bQsCM6O+A==, tarball: file:vendor/jeswr-solid-server-0.1.0.tgz}
+    version: 0.1.0
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@jeswr/solid-showcase-kit@file:vendor/jeswr-solid-showcase-kit-0.1.0.tgz':
     resolution: {integrity: sha512-NlsBoTmjzfvbJZZC5fr80y+OdphkMQ33+IiZkMxcKOsTZ6sZmArhBkcYV/fYjc/A/1VcoPGnok6o2EQ1/ZJ4og==, tarball: file:vendor/jeswr-solid-showcase-kit-0.1.0.tgz}
     version: 0.1.0
@@ -2094,6 +2147,9 @@ packages:
   '@so-ric/colorspace@1.1.6':
     resolution: {integrity: sha512-/KiKkpHNOBgkFJwu9sh48LkHSMYGyuTcSFK/qMBdnOAlrRJzRSXAOFB5qwzaVQuDl8wAvHVMkaASQDReTahxuw==}
 
+  '@solid/access-token-verifier@2.1.1':
+    resolution: {integrity: sha512-dGvu4xk3P74xl6XYsULWBY8F/fNCoi/EK07Iv3RT+0vDA21+3VEKk72sWmki0W59qJRTRDQZXkCOyo4b5Hd7zA==}
+
   '@solid/object@0.6.0':
     resolution: {integrity: sha512-Ybme2HjbeWKZ6jOyYxacsFnAC6wPaifnSNO39bYW7PdbTEwgT56jG0Rp3TAWzXJvRjBzqMErUwvOMpqd8sVeOw==}
     engines: {node: '>=24.0.0'}
@@ -2562,6 +2618,10 @@ packages:
     resolution: {integrity: sha512-FJhYRoDaiatfEkUK8HKlicmu/3SGFD51q3itKDGoSTysQJBnfOcxU5GxnhE1E6soB76MbT0MBtnKJuXyAx+96Q==}
     engines: {node: '>=6'}
 
+  get-port@7.2.0:
+    resolution: {integrity: sha512-afP4W205ONCuMoPBqcR6PSXnzX35KTcJygfJfcp+QY+uwm3p20p1YczWXhlICIzGMCxYBQcySEcOgsJcrkyobg==}
+    engines: {node: '>=16'}
+
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
@@ -2608,6 +2668,9 @@ packages:
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
+
+  jose@5.10.0:
+    resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
 
   jose@6.2.3:
     resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
@@ -2712,6 +2775,10 @@ packages:
   lru-cache@11.5.2:
     resolution: {integrity: sha512-4pfM1Ff0x50o0tQwb5ucw/RzNyD0/YJME6IVcStalZuMWxdt3sR3huStTtxz4PUmvZfRguvDejasvQ2kifR11g==}
     engines: {node: 20 || >=22}
+
+  lru-cache@6.0.0:
+    resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
+    engines: {node: '>=10'}
 
   lucide-react@0.544.0:
     resolution: {integrity: sha512-t5tS44bqd825zAW45UQxpG2CvcC4urOwn2TrwSH8u+MjeE+1NnWl6QqeQ/6NdjMqdOygyiT9p3Ev0p1NJykxjw==}
@@ -3079,6 +3146,9 @@ packages:
     resolution: {integrity: sha512-aZbgViZrg1QNcG+LULa7nhZpJTZSLm/mXnHXnbAbjmN5aSa0y7V+wvv6+4WaBtpISJzThKy+PIPxc1Nq1EJ9mg==}
     engines: {node: '>= 14.0.0'}
 
+  ts-guards@0.5.1:
+    resolution: {integrity: sha512-Y6P/VJnwARiPMfxO7rvaYaz5tGQ5TQ0Wnb2cWIxMpFOioYkhsT8XaCrJX6wYPNFACa4UOrN5SPqhwpM8NolAhQ==}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -3244,6 +3314,9 @@ packages:
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
+
+  yallist@4.0.0:
+    resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
   yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
@@ -5994,6 +6067,12 @@ snapshots:
     transitivePeerDependencies:
       - shacl-engine
 
+  '@jeswr/solid-server@file:vendor/jeswr-solid-server-0.1.0.tgz':
+    dependencies:
+      '@solid/access-token-verifier': 2.1.1
+    transitivePeerDependencies:
+      - encoding
+
   '@jeswr/solid-showcase-kit@file:vendor/jeswr-solid-showcase-kit-0.1.0.tgz(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@jeswr/app-shell': file:vendor/jeswr-app-shell-0.1.0.tgz(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -6472,6 +6551,16 @@ snapshots:
       color: 5.0.3
       text-hex: 1.0.0
 
+  '@solid/access-token-verifier@2.1.1':
+    dependencies:
+      jose: 5.10.0
+      lru-cache: 6.0.0
+      n3: 1.26.0
+      node-fetch: 2.7.0
+      ts-guards: 0.5.1
+    transitivePeerDependencies:
+      - encoding
+
   '@solid/object@0.6.0':
     dependencies:
       '@rdfjs/wrapper': 0.34.0
@@ -6917,6 +7006,8 @@ snapshots:
 
   get-nonce@1.0.1: {}
 
+  get-port@7.2.0: {}
+
   graceful-fs@4.2.11: {}
 
   grapoi@1.2.0:
@@ -6960,6 +7051,8 @@ snapshots:
   is-stream@2.0.1: {}
 
   jiti@2.7.0: {}
+
+  jose@5.10.0: {}
 
   jose@6.2.3: {}
 
@@ -7070,6 +7163,10 @@ snapshots:
   lru-cache@10.4.3: {}
 
   lru-cache@11.5.2: {}
+
+  lru-cache@6.0.0:
+    dependencies:
+      yallist: 4.0.0
 
   lucide-react@0.544.0(react@19.2.7):
     dependencies:
@@ -7527,6 +7624,8 @@ snapshots:
 
   triple-beam@1.4.1: {}
 
+  ts-guards@0.5.1: {}
+
   tslib@2.8.1: {}
 
   turbo@2.10.5:
@@ -7647,6 +7746,8 @@ snapshots:
   xmlchars@2.2.0: {}
 
   y18n@5.0.8: {}
+
+  yallist@4.0.0: {}
 
   yargs-parser@21.1.1: {}
 

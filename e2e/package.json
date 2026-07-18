@@ -9,6 +9,8 @@
   },
   "devDependencies": {
     "@lending/app-tour": "workspace:*",
+    "@lending/seeds": "workspace:*",
+    "@lending/test-kit": "workspace:*",
     "@axe-core/playwright": "^4.12.1",
     "@jeswr/solid-showcase": "^0.1.0",
     "@jeswr/solid-showcase-kit": "^0.1.0",

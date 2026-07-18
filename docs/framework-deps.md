@@ -29,6 +29,25 @@ packages the generated repo consumes directly plus their unpublished
 | `jeswr-guarded-fetch-0.1.0.tgz` | `@jeswr/guarded-fetch` | transitive of solid-pod-guard |
 | `jeswr-solid-api-auth-0.1.0.tgz` | `@jeswr/solid-api-auth` | transitive of solid-pod-guard |
 | `jeswr-rdf-serialize-0.1.0.tgz` | `@jeswr/rdf-serialize` | transitive of synthetic-rdf / solid-seed |
+| `jeswr-solid-server-0.1.0.tgz` | `@jeswr/solid-server` | dev/test Solid server (`packages/test-kit`; direct) |
+
+### `@jeswr/solid-server` provenance (seeder round)
+
+Copied byte-for-byte from the solid-mortgage workspace's own vendored copy
+(`packages/solid-kit/vendor/jeswr-solid-server-0.1.0.tgz` in `jeswr/solid-mortgage`),
+which built it from a `sparq-org/sparq` checkout:
+
+| Field | Value |
+| --- | --- |
+| Package | `@jeswr/solid-server@0.1.0` |
+| Tarball | `jeswr-solid-server-0.1.0.tgz` (800095 bytes, sha256 `05f603d7a3320ffcb222703e4ba2ecbf913f18657c4c2eddaf28a80528b4db8d`) |
+| sparq source | <https://github.com/sparq-org/sparq> @ `947480b02fcbd174f80f9247b55ee02202d2e345` |
+| Build command | `npm --workspace @jeswr/solid-server run build:lws-wasm` (full tier) then `npm pack --ignore-scripts` |
+
+This repo consumes only the package's top-level `.` export (`startSolidServer`) for
+the Node dev/test harness (`packages/test-kit`) — the solid-mortgage `./http`/`./wasm`
+subpath patch (browser-pod WASM hosting) is NOT needed here and is NOT applied; no
+`pnpm.patchedDependencies` entry exists for this package in this repo.
 
 ## When the framework hits npm
 

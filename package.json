@@ -16,11 +16,15 @@
     "lint:iris": "node scripts/lint-iris.mjs",
     "check:insignia": "node scripts/check-insignia.mjs",
     "seed": "pnpm --filter @lending/seeds run seed",
+    "dev:pod": "node scripts/dev-pod.ts",
     "e2e": "pnpm --filter @lending/e2e run test:e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.4",
     "@jeswr/solid-showcase-kit": "^0.1.0",
+    "@lending/seeds": "workspace:*",
+    "@lending/test-kit": "workspace:*",
+    "@types/node": "^25.9.2",
     "turbo": "^2.10.4",
     "typescript": "^6.0.3"
   },
@@ -34,7 +38,8 @@
       "@jeswr/app-shell": "file:./vendor/jeswr-app-shell-0.1.0.tgz",
       "@jeswr/guarded-fetch": "file:./vendor/jeswr-guarded-fetch-0.1.0.tgz",
       "@jeswr/solid-api-auth": "file:./vendor/jeswr-solid-api-auth-0.1.0.tgz",
-      "@jeswr/rdf-serialize": "file:./vendor/jeswr-rdf-serialize-0.1.0.tgz"
+      "@jeswr/rdf-serialize": "file:./vendor/jeswr-rdf-serialize-0.1.0.tgz",
+      "@jeswr/solid-server": "file:./vendor/jeswr-solid-server-0.1.0.tgz"
     }
   }
 }
