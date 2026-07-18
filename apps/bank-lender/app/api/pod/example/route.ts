@@ -1,5 +1,5 @@
 import { createPodRouteGuard, type PodRouteGuard } from "@jeswr/solid-pod-guard";
-import { guardConfig } from "../../../../lib/server/config";
+import { configFromEnv } from "../../../../lib/server/config";
 
 /**
  * Sample AUTHENTICATED pod route behind the full fail-closed pipeline:
@@ -11,7 +11,7 @@ import { guardConfig } from "../../../../lib/server/config";
 let guard: PodRouteGuard | undefined;
 
 function getGuard(): PodRouteGuard {
-  guard ??= createPodRouteGuard({ config: guardConfig() });
+  guard ??= createPodRouteGuard({ config: configFromEnv() });
   return guard;
 }
 
