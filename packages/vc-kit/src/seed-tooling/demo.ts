@@ -169,6 +169,12 @@ export const DEMO_HIDDEN_FIELDS: Readonly<Record<string, readonly string[]>> = O
  * Every integer whose sparq term encoding the fixture set captures: the
  * hidden demo values (income 2860, score 720, NSF 0), the scene-2 statement
  * operands (2200, 660, 0) and the budget bounds the zk tests will exercise.
+ *
+ * 500 is a genuine in-budget (`sh:minInclusive 300`), below-threshold
+ * cash-flow score - the Tier-A prover's UNSATISFIABLE coverage needs a real
+ * captured encoding for "a value that fits the field's digit budget but
+ * fails the statement", and 300-659 has no other member of this set (0/99
+ * are below the score field's own minimum).
  */
 export const DEMO_OPERAND_VALUES: readonly number[] = Object.freeze(
   [
@@ -180,6 +186,7 @@ export const DEMO_OPERAND_VALUES: readonly number[] = Object.freeze(
       maya().nsf90Count,
       maya().cashFlowScoreValue,
       maya().netMonthlyIncomeUsd,
+      500,
       850,
       9999,
     ]),

@@ -105,3 +105,4 @@ export {
   LSHAPE,
   targetClassOf,
 } from "./vocab.ts";
+export * from "./zk/index.ts";
