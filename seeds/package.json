@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
   "scripts": {
     "seed": "node run.ts",
     "typecheck": "tsc --noEmit",
@@ -10,12 +12,14 @@
   },
   "dependencies": {
     "@lending/data-model": "workspace:*",
+    "@lending/vc-kit": "workspace:*",
     "@jeswr/solid-seed": "^0.1.0",
     "@jeswr/synthetic-rdf": "^0.1.0",
     "n3": "^2.0.3",
     "shacl-engine": "^1.1.2"
   },
   "devDependencies": {
+    "@lending/test-kit": "workspace:*",
     "@rdfjs/types": "^2.0.1",
     "@types/n3": "^1.26.1",
     "@types/node": "^25.9.2",

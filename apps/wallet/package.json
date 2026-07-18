@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@lending/app-tour": "workspace:*",
+    "@lending/seeds": "workspace:*",
     "@jeswr/solid-pod-guard": "^0.1.0",
     "@jeswr/solid-showcase": "^0.1.0",
     "@jeswr/solid-showcase-kit": "^0.1.0",
