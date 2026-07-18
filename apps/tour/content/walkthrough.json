@@ -591,7 +591,8 @@
         "modelledOn": "Mastercard (Send)",
         "path": "/disbursement",
         "podRoutes": [
-          "/api/pod/example"
+          "/api/pod/example",
+          "/api/payout"
         ],
         "slug": "disbursement",
         "theme": {

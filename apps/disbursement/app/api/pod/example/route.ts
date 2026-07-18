@@ -1,17 +1,18 @@
 import { createPodRouteGuard, type PodRouteGuard } from "@jeswr/solid-pod-guard";
-import { guardConfig } from "../../../../lib/server/config";
+import { configFromEnv } from "../../../../lib/server/config";
 
 /**
  * Sample AUTHENTICATED pod route behind the full fail-closed pipeline:
  * anonymous ⇒ 401 (before any validation), caller-supplied pod/webid ⇒ 400,
  * unconfigured issuer allowlist ⇒ 503, binding failure ⇒ 403 — never pick-first.
- * Replace the handler body with this app's real scene logic; the caller's
- * `{ webid, podBase }` is derived from the TOKEN, never from the request.
+ * The app's REAL scene-4 logic is `/api/payout` (`lib/server/payout-rail.ts`);
+ * this sample route is kept only as the scaffold's own smoke-tested boundary
+ * (`test/pod-guard.test.ts`).
  */
 let guard: PodRouteGuard | undefined;
 
 function getGuard(): PodRouteGuard {
-  guard ??= createPodRouteGuard({ config: guardConfig() });
+  guard ??= createPodRouteGuard({ config: configFromEnv() });
   return guard;
 }
 
