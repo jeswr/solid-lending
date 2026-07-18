@@ -196,8 +196,20 @@ async function createDevIssuerIdentity(): Promise<{
       client_id: "https://app.example/client",
       cnf: { jkt: thumbprint },
       webid,
+      // Required by `@jeswr/solid-api-auth`'s RFC 9068 sanity check (a
+      // present-but-empty/absent `sub` is rejected before `webid` is even
+      // read) — every `@jeswr/solid-pod-guard`-fronted app route verifies
+      // through that package.
+      sub: webid,
     })
-      .setProtectedHeader({ alg: "ES256", kid: issuerJwk.kid })
+      // RFC 9068 `at+jwt`: strict resource-server verifiers
+      // (`@jeswr/solid-api-auth`'s `DpopApiVerifier`) reject a token without
+      // it — omitting this left every pod-guard-fronted route rejecting this
+      // harness's tokens with a 401 ("unexpected typ JWT header value")
+      // before reaching any app logic. sparq's own OIDC verification
+      // (`@solid/access-token-verifier`, used for direct pod WAC reads) is
+      // unaffected either way — this only widens what verifies, never narrows.
+      .setProtectedHeader({ alg: "ES256", kid: issuerJwk.kid, typ: "at+jwt" })
       .setIssuer(issuer)
       .setAudience("solid")
       .setIssuedAt(seconds)

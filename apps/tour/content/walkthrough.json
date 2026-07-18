@@ -453,7 +453,8 @@
         "healthPath": "/wallet/api/health",
         "honesty": {
           "real": [
-            "Serves an authenticated pod route guarded by @jeswr/solid-pod-guard (fails closed until an operator configures it)"
+            "Serves authenticated pod routes guarded by @jeswr/solid-pod-guard (fails closed until an operator configures it) for grant/revoke/ledger",
+            "Credential verify-on-view and the scene-2 pre-qualification proof run the real fail-closed vc-kit chain and a real sparq UltraHonk prover/verifier"
           ],
           "simulated": [
             "Every credential, grant, receipt, and balance in this app is scripted demo content for a fictional borrower"
@@ -462,7 +463,10 @@
         "modelledOn": "Verizon",
         "path": "/wallet",
         "podRoutes": [
-          "/api/pod/example"
+          "/api/pod/example",
+          "/api/grants",
+          "/api/grants/change",
+          "/api/ledger"
         ],
         "slug": "wallet",
         "theme": {
