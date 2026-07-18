@@ -1,18 +1,25 @@
 # The demo persona's SHACL shape: drives deterministic synthetic data
 # (@jeswr/synthetic-rdf) and validates every seeded persona resource.
-# Only real namespaces + a urn:example: local shape identity (no minted IRIs).
+# Pinned to the walkthrough persona card (Maya Torres / MT-0001) - the seeded
+# pod data must match apps/tour/content/walkthrough.json. Only real
+# namespaces + urn:example: local identities (no minted IRIs). Credential
+# subject nodes stay deliberately UNTYPED, so this schema:Person target never
+# fires on them.
 @prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix schema: <https://schema.org/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <urn:example:shape:persona> a sh:NodeShape ;
   sh:targetClass schema:Person ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
   sh:property [
     sh:path schema:name ;
     sh:datatype xsd:string ;
     sh:minCount 1 ;
     sh:maxCount 1 ;
-    sh:pattern "^[A-Z][a-z]+ [A-Z][a-z]+$" ;
+    sh:in ( "Maya Torres" ) ;
   ] ;
   sh:property [
     sh:path schema:identifier ;

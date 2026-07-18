@@ -1,0 +1,11 @@
+{
+  "generatedBy": "packages/vc-kit/scripts/capture-fixtures.mjs",
+  "regenerate": "SPARQ_CHECKOUT=<sparq checkout> pnpm --filter @lending/vc-kit run capture:fixtures",
+  "sparqRepository": "https://github.com/jeswr/sparq",
+  "sparqCommit": "947480b02fcbd174f80f9247b55ee02202d2e345",
+  "toolchain": {
+    "node": "v24.18.0"
+  },
+  "capturedAt": "2026-07-18",
+  "note": "All values are genuine sparq-native outputs (encode_int_literal, Poseidon2 commitments, Schnorr-BJJ signatures). Research-grade; NOT externally audited. Attestation fixtures use the PUBLIC-label deterministic salts/blindings (fixture mode) — byte-stable for tests, never a production pattern."
+}

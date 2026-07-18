@@ -1,0 +1,200 @@
+# The lending walkthrough's residue vocabulary — every term the real,
+# dereferenceable namespaces (FIBO, schema.org, W3C VC/DPV/ODRL/PROV, DCMI)
+# do not provide. Single source of truth: src/vocab/lend.ts is GENERATED from
+# this file (node scripts/generate-vocab.mjs).
+#
+# NAMESPACE (house rule, AGENTS.md rule 5): local identities use the RFC 6963
+# example URN space — deliberately non-dereferenceable, never a minted http
+# domain. If this demo later publishes a hosted vocabulary (the mortgage
+# demo's dedicated-vocab-project pattern), publish FIRST, then migrate this
+# namespace in one commit; until then nothing pretends to dereference.
+#
+# FDX note: the bank cash-flow terms carry a documentation-level field mapping
+# to FDX API semantics (docs/fibo-fdx-binding.md is the demo's standards
+# artifact); FDX publishes no RDF namespace, so the mapping lives in prose and
+# rdfs:comment, never as minted FDX IRIs.
+
+@prefix lend: <urn:example:lend#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<urn:example:lend>
+  a owl:Ontology ;
+  rdfs:label "Small-dollar lending walkthrough residue vocabulary" ;
+  rdfs:comment "Concept-demonstration vocabulary. All data simulated; no real PII. Terms defined here are those FIBO LOAN (ConsumerLoans/LoansGeneral), schema.org, W3C VC 2.0, DPV, ODRL and PROV do not already provide." .
+
+### Credential classes (the W3C VC 2.0 envelope types; one per §6.2 row)
+
+lend:IdentityCredential a owl:Class ;
+  rdfs:label "identity credential" ;
+  rdfs:comment "KYC/CIP identity VC issued once by the identity-verification seat (scene 1); holder-bound to the borrower WebID." .
+
+lend:EmploymentIncomeCredential a owl:Class ;
+  rdfs:label "employment and income credential" ;
+  rdfs:comment "Employment + verified net monthly income VC issued by the income-verification seat; the income field participates in the scene-2 ZK predicate." .
+
+lend:BankCashFlowCredential a owl:Class ;
+  rdfs:label "bank cash-flow credential" ;
+  rdfs:comment "FDX-shaped bank cash-flow attribute set (deposit streams, NSF count over 90 days, balance statistics) issued by the bank-data-provider seat. Field mapping to FDX API semantics: docs/fibo-fdx-binding.md." .
+
+lend:CashFlowScoreCredential a owl:Class ;
+  rdfs:label "cash-flow score credential" ;
+  rdfs:comment "Cash-flow score VC derived from the bank cash-flow credential (prov:wasDerivedFrom on the credential node); the score participates in the scene-2 ZK predicate." .
+
+lend:CreditScoreCredential a owl:Class ;
+  rdfs:label "credit score credential" ;
+  rdfs:comment "Traditional bureau-score VC — the 'old rail' of the scene-3 two-models contrast. Disclosed, never ZK-proved in this demo." .
+
+lend:LoanOfferCredential a owl:Class ;
+  rdfs:label "loan offer credential" ;
+  rdfs:comment "Priced loan offer carrying the closed-end-credit disclosure fields (APR, finance charge, total of payments, payment schedule) that Reg Z §§1026.17-18 requires before consummation; lands in the borrower's pod (scene 3)." .
+
+lend:DisbursementReceiptCredential a owl:Class ;
+  rdfs:label "disbursement receipt credential" ;
+  rdfs:comment "Push-to-card funding receipt written to the pod by the disbursement seat; start/settle timestamps carry the scene-4 minutes-not-days beat." .
+
+lend:RepaymentHistoryCredential a owl:Class ;
+  rdfs:label "repayment history credential" ;
+  rdfs:comment "The graduation credential (scene 5): on-time repayment counts furnished to the bureau seat and reusable with future lenders." .
+
+lend:ZkOperandAnchor a owl:Class ;
+  rdfs:label "ZK operand anchor" ;
+  rdfs:comment "Issuer-signed binding of a hidden field's deterministic sparq term encoding (operand_enc). The Tier-A filter proofs of the next build round verify against these anchors; never ship a Tier-A surface without the anchor check." .
+
+### Support classes
+
+lend:DepositStream a owl:Class ;
+  rdfs:label "deposit stream" ;
+  rdfs:comment "One recurring income stream observed on the account (FDX analogue: recurring credit transaction stream aggregated from /accounts/{accountId}/transactions)." .
+
+### Controlled vocabularies
+
+lend:ScoreModelScheme a skos:ConceptScheme ;
+  rdfs:label "score model scheme" ;
+  rdfs:comment "Value space of lend:scoreModel. Illustrative, unbranded model identifiers — third-party score product marks never render in this demo." .
+
+lend:ScoreModel-BureauClassic a skos:Concept ;
+  skos:inScheme lend:ScoreModelScheme ;
+  rdfs:label "bureau score model (classic)" ;
+  rdfs:comment "Generic traditional bureau score model, 300–850 range (the demo persona's thin file scores 612 here)." .
+
+lend:ScoreModel-CashFlowV1 a skos:Concept ;
+  skos:inScheme lend:ScoreModelScheme ;
+  rdfs:label "cash-flow score model v1" ;
+  rdfs:comment "Illustrative consumer-permissioned cash-flow score model, pinned to a 300–850 range so the walkthrough reads familiarly." .
+
+lend:PaymentRailScheme a skos:ConceptScheme ;
+  rdfs:label "payment rail scheme" ;
+  rdfs:comment "Value space of lend:paymentRail." .
+
+lend:PaymentRail-PushToCard a skos:Concept ;
+  skos:inScheme lend:PaymentRailScheme ;
+  rdfs:label "push-to-card" ;
+  rdfs:comment "Card-network push payment to the borrower's debit card — the ≤30-minute funding rail of scene 4." .
+
+### Properties — ZK scaled-unit fields (the ONLY ZK-provable fields; budgets in src/zk-budgets.ts)
+
+lend:netMonthlyIncomeUsd a owl:DatatypeProperty ;
+  rdfs:label "net monthly income (USD/month)" ;
+  rdfs:comment "Verified net monthly income in whole USD (xsd:integer). ZK field: 4-digit budget 0..9999, sparq filter_int_d4; scene-2 predicate income ≥ 2200." .
+
+lend:cashFlowScoreValue a owl:DatatypeProperty ;
+  rdfs:label "cash-flow score value" ;
+  rdfs:comment "Cash-flow score points (xsd:integer, 300..850). ZK field: 3-digit budget, sparq filter_int_d3; scene-2 predicate score ≥ 660." .
+
+lend:nsf90Count a owl:DatatypeProperty ;
+  rdfs:label "NSF events in the last 90 days" ;
+  rdfs:comment "Count of insufficient-funds events over the trailing 90 days (xsd:integer, 0..99; FDX analogue: NSF/returned-item transaction count). ZK field: 2-digit budget, sparq filter_int_d2; scene-2 predicate NSF90 = 0 (equality-to-zero)." .
+
+### Properties — bank cash-flow attribute set (FDX-shaped; mapping in docs/fibo-fdx-binding.md)
+
+lend:hasDepositStream a owl:ObjectProperty ;
+  rdfs:label "has deposit stream" ;
+  rdfs:comment "Links the cash-flow subject to one observed lend:DepositStream." .
+
+lend:hasAverageDailyBalance a owl:ObjectProperty ;
+  rdfs:label "has average daily balance" ;
+  rdfs:comment "Average daily balance over the observation window, as a display schema:MonetaryAmount (FDX analogue: averageDailyBalance account statistic)." .
+
+lend:observationMonths a owl:DatatypeProperty ;
+  rdfs:label "observation window (months)" ;
+  rdfs:comment "Length of the consumer-permissioned transaction window the attributes were computed over (xsd:integer months, 1..36)." .
+
+lend:accountLast4 a owl:DatatypeProperty ;
+  rdfs:label "account number last four digits" ;
+  rdfs:comment "Masked display identifier — exactly four digits; the full account or card number never enters the pod." .
+
+### Properties — bureau file facts
+
+lend:creditScoreValue a owl:DatatypeProperty ;
+  rdfs:label "bureau score value" ;
+  rdfs:comment "Traditional bureau score points (xsd:integer, 300..850). Disclosed display value in this demo — not a ZK field." .
+
+lend:tradelineCount a owl:DatatypeProperty ;
+  rdfs:label "tradeline count" ;
+  rdfs:comment "Number of open tradelines on the bureau file (the thin-file beat: the persona has two)." .
+
+lend:creditHistoryMonths a owl:DatatypeProperty ;
+  rdfs:label "credit history (months)" ;
+  rdfs:comment "Age of the oldest tradeline in months (the thin-file beat: 14)." .
+
+lend:scoreModel a owl:ObjectProperty ;
+  rdfs:label "score model" ;
+  rdfs:comment "The scoring model concept (lend:ScoreModelScheme) a score value was produced under." .
+
+### Properties — loan offer / closed-end disclosure fields
+
+lend:hasLoanOffer a owl:ObjectProperty ;
+  rdfs:label "has loan offer" ;
+  rdfs:comment "Links the borrower subject to the offered consumer-loan node (fibo ConsumerLoans UnsecuredConsumerLoan + LoansGeneral ClosedEndCredit + schema:LoanOrCredit)." .
+
+lend:hasFinanceCharge a owl:ObjectProperty ;
+  rdfs:label "has finance charge" ;
+  rdfs:comment "The dollar cost of credit over the life of the loan (Reg Z §1026.18(d) disclosure field), as a schema:MonetaryAmount." .
+
+lend:hasTotalOfPayments a owl:ObjectProperty ;
+  rdfs:label "has total of payments" ;
+  rdfs:comment "Principal plus finance charge — the total the borrower will have paid after all scheduled payments (Reg Z §1026.18(h) disclosure field), as a schema:MonetaryAmount." .
+
+lend:loanTermMonths a owl:DatatypeProperty ;
+  rdfs:label "loan term (months)" ;
+  rdfs:comment "Scheduled term of the installment loan in months (xsd:integer, 1..120 for this small-dollar demo)." .
+
+### Properties — disbursement receipt
+
+lend:hasDisbursement a owl:ObjectProperty ;
+  rdfs:label "has disbursement" ;
+  rdfs:comment "Links the borrower subject to the schema:MoneyTransfer node recording the push-to-card funding event." .
+
+lend:paymentRail a owl:ObjectProperty ;
+  rdfs:label "payment rail" ;
+  rdfs:comment "The rail the disbursement travelled (lend:PaymentRailScheme)." .
+
+### Properties — repayment history
+
+lend:onTimePaymentCount a owl:DatatypeProperty ;
+  rdfs:label "on-time payment count" ;
+  rdfs:comment "Scheduled payments made on time within the reporting period (xsd:integer)." .
+
+lend:latePaymentCount a owl:DatatypeProperty ;
+  rdfs:label "late payment count" ;
+  rdfs:comment "Scheduled payments made late (or missed) within the reporting period (xsd:integer)." .
+
+lend:scheduledPaymentCount a owl:DatatypeProperty ;
+  rdfs:label "scheduled payment count" ;
+  rdfs:comment "Total payments scheduled for the loan (xsd:integer; on-time + late can never exceed it — SPARQL-constrained in the shape)." .
+
+lend:servicedLoan a owl:ObjectProperty ;
+  rdfs:label "serviced loan" ;
+  rdfs:comment "The funded loan-offer pod resource this payment history reports on." .
+
+### Properties — ZK operand anchor
+
+lend:field a owl:ObjectProperty ;
+  rdfs:label "anchored field" ;
+  rdfs:comment "The hidden field IRI an operand anchor binds — one of the three ZK scaled-unit fields (sh:in-constrained in the shape)." .
+
+lend:operandEnc a owl:DatatypeProperty ;
+  rdfs:label "operand encoding" ;
+  rdfs:comment "The deterministic sparq encode_int_literal term encoding of the hidden value, as a 0x-prefixed lowercase hex field element." .

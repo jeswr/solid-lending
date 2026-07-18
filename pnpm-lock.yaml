@@ -374,6 +374,55 @@ importers:
 
   packages/data-model:
     dependencies:
+      '@jeswr/rdf-serialize':
+        specifier: file:../../vendor/jeswr-rdf-serialize-0.1.0.tgz
+        version: file:vendor/jeswr-rdf-serialize-0.1.0.tgz
+      '@rdfjs/data-model':
+        specifier: ^2.1.2
+        version: 2.1.2
+      '@rdfjs/dataset':
+        specifier: ^2.0.3
+        version: 2.0.3
+      '@rdfjs/types':
+        specifier: ^2.0.1
+        version: 2.0.1
+      '@rdfjs/wrapper':
+        specifier: ^0.34.0
+        version: 0.34.0
+      n3:
+        specifier: ^2.0.3
+        version: 2.1.1
+      shacl-engine:
+        specifier: ^1.1.2
+        version: 1.1.2
+    devDependencies:
+      '@types/n3':
+        specifier: ^1.26.1
+        version: 1.26.1
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.5
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.10(@types/node@25.9.5)(vite@8.1.5(@types/node@25.9.5)(jiti@2.7.0))
+
+  packages/vc-kit:
+    dependencies:
+      '@jeswr/solid-vc':
+        specifier: github:jeswr/solid-vc#bee27d508372e64021e23bdaeb2d79c06e08cf18
+        version: https://codeload.github.com/jeswr/solid-vc/tar.gz/bee27d508372e64021e23bdaeb2d79c06e08cf18
+      '@lending/data-model':
+        specifier: workspace:*
+        version: link:../data-model
+      '@rdfjs/types':
+        specifier: ^2.0.1
+        version: 2.0.1
+      '@rdfjs/wrapper':
+        specifier: ^0.34.0
+        version: 0.34.0
       n3:
         specifier: ^2.0.3
         version: 2.1.1
@@ -1485,6 +1534,11 @@ packages:
     engines: {node: '>=20.12'}
     peerDependencies:
       react: '>=18'
+
+  '@jeswr/solid-vc@https://codeload.github.com/jeswr/solid-vc/tar.gz/bee27d508372e64021e23bdaeb2d79c06e08cf18':
+    resolution: {tarball: https://codeload.github.com/jeswr/solid-vc/tar.gz/bee27d508372e64021e23bdaeb2d79c06e08cf18}
+    version: 0.1.0
+    engines: {node: '>=24'}
 
   '@jeswr/stream-to-string@2.0.0':
     resolution: {integrity: sha512-VmoW6xYRjVzdMr2njBObVSlUc5KCJT+gyuuH+tea9ZLE59XhgfLNc8ufN5Md38STxCyAJUDUVcCBfaOo11BfuA==}
@@ -2617,6 +2671,9 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
+  multiformats@14.0.4:
+    resolution: {integrity: sha512-+SXItmOUWzT0kjlIfkZ4NawJaC9jW/mPlyn902V9Qgpc7YDwdEiwqbiZxTyvC0XWh1jZguXca3A/WQ+UOPRLUA==}
+
   n3@1.26.0:
     resolution: {integrity: sha512-SQknS0ua90rN+3RHuk8BeIqeYyqIH/+ecViZxX08jR4j6MugqWRjtONl3uANG/crWXnOM2WIqBJtjIhVYFha+w==}
     engines: {node: '>=12.0'}
@@ -2715,6 +2772,10 @@ packages:
 
   promise-polyfill@1.1.6:
     resolution: {integrity: sha512-7rrONfyLkDEc7OJ5QBkqa4KI4EBhCd340xRuIUPGCfu13znS+vx+VDdrT9ODAJHlXm7w4lbxN3DRjyv58EuzDg==}
+
+  rdf-canonize@5.0.0:
+    resolution: {integrity: sha512-g8OUrgMXAR9ys/ZuJVfBr05sPPoMA7nHIVs8VEvg9QwM5W4GR2qSFEEHjsyHF1eWlBaf8Ev40WNjQFQ+nJTO3w==}
+    engines: {node: '>=18'}
 
   rdf-data-factory@1.1.3:
     resolution: {integrity: sha512-ny6CI7m2bq4lfQQmDYvcb2l1F9KtGwz9chipX4oWu2aAtVoXjb7k3d8J1EsgAsEbMXnBipB/iuRen5H2fwRWWQ==}
@@ -2834,6 +2895,9 @@ packages:
     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
     hasBin: true
+
+  setimmediate@1.0.5:
+    resolution: {integrity: sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==}
 
   shacl-engine@1.1.2:
     resolution: {integrity: sha512-ypclUwHJ6KPYUZb8ggslN7BSOwza9vgIwQgLY0oey0Xbzla6B7cRWroeDvfkntYzU1HnERgGvC/qsKge3a6s1Q==}
@@ -5866,6 +5930,19 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
+  '@jeswr/solid-vc@https://codeload.github.com/jeswr/solid-vc/tar.gz/bee27d508372e64021e23bdaeb2d79c06e08cf18':
+    dependencies:
+      '@jeswr/guarded-fetch': file:vendor/jeswr-guarded-fetch-0.1.0.tgz
+      '@jeswr/rdf-serialize': file:vendor/jeswr-rdf-serialize-0.1.0.tgz
+      '@rdfjs/wrapper': 0.34.0
+      '@solid/object': 0.6.0
+      content-type: 1.0.5
+      jose: 6.2.3
+      jsonld-streaming-parser: 5.0.1
+      multiformats: 14.0.4
+      n3: 2.1.1
+      rdf-canonize: 5.0.0
+
   '@jeswr/stream-to-string@2.0.0':
     dependencies:
       event-emitter-promisify: 1.1.0
@@ -6892,6 +6969,8 @@ snapshots:
 
   ms@2.1.3: {}
 
+  multiformats@14.0.4: {}
+
   n3@1.26.0:
     dependencies:
       buffer: 6.0.3
@@ -6979,6 +7058,10 @@ snapshots:
   process@0.11.10: {}
 
   promise-polyfill@1.1.6: {}
+
+  rdf-canonize@5.0.0:
+    dependencies:
+      setimmediate: 1.0.5
 
   rdf-data-factory@1.1.3:
     dependencies:
@@ -7166,6 +7249,8 @@ snapshots:
   scheduler@0.27.0: {}
 
   semver@7.8.5: {}
+
+  setimmediate@1.0.5: {}
 
   shacl-engine@1.1.2:
     dependencies:

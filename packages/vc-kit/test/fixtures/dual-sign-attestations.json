@@ -1,0 +1,51 @@
+{
+  "provenance": {
+    "see": "PROVENANCE.json",
+    "sparqCommit": "947480b02fcbd174f80f9247b55ee02202d2e345",
+    "capturedAt": "2026-07-18"
+  },
+  "attestations": {
+    "cashFlow": {
+      "commitment": "0x0d8c6c297463456adff3b8bdae34864cf5bc6c74e202a04d78e0ce6a1c3c5d0d",
+      "salt": "0x0060ecf634745e7317378964d476b1465c7299115bf43aa44e5d1019269f872f",
+      "issuerPublicKey": "ec7f43abbb9f0655b362d61d0448c805b0e8cf09ea176f7033abe5a8bb5bfe08",
+      "signature": "e735cd208039f4c9a9726bc757b763ad750dec9979327a35e3eb63c1b484430ca89b36338d6f9ec026b8119cabe2cd94484a87cf552bd072442ba870b6554305",
+      "cryptosuite": "https://sparq.dev/ns/zk#poseidon2-schnorr-v1",
+      "message": "0x0a00d5bbb9234c92b2d7917cd233ccc0a46218631dd04c62ffa53e5624fcdc96",
+      "canonicalTriples": 38,
+      "status": {
+        "listIri": "https://verifications.example/status/zk-cash-flow",
+        "version": 1,
+        "indexCommitment": "0x00abeb59452694ebb406a9428eb3786340ff31232f5fdc5a5d2c9096d737262f"
+      }
+    },
+    "cashFlowScore": {
+      "commitment": "0x0fcb08ce822e47bda2f0d3e7a15887598cd2acf48c1f34d81d0c26f15ad1eccd",
+      "salt": "0x00174347cf3bc5a5042d5041dfe8734cdb6bcb96ad1f557ed59f625f614c5ee6",
+      "issuerPublicKey": "fa0a3288e2791a90fbde34a3b1f6f1257f4393553afdef9634a8c51fb757949a",
+      "signature": "9f53ef0a52d14c654723d3a08706e554077d53a5875eb0dec615ba4ad3667aa28e4ddad5566d3d64b34a532f0766dd378bc4665f95ff7852a8cca6373f99ff01",
+      "cryptosuite": "https://sparq.dev/ns/zk#poseidon2-schnorr-v1",
+      "message": "0x067f8787beab18c2bf6cf5fa5a91f4649a3b093bef5d1f50567031a0f6ef8491",
+      "canonicalTriples": 15,
+      "status": {
+        "listIri": "https://verifications.example/status/zk-cash-flow-score",
+        "version": 1,
+        "indexCommitment": "0x08094d5d75db1a603699fd8da40ab37910cf21662bdd0b3ac9b63034949c398f"
+      }
+    },
+    "employment": {
+      "commitment": "0x1a54346195d376c5c6ee011e710ad03f51085e64552f8077b3afe3a9ce7738a2",
+      "salt": "0x001eb7f8f02c2fc60b0327b9d007023c63525a6ca5694075d02d0ce576222a3f",
+      "issuerPublicKey": "83862653cf39c02b3183bf1024bece2035ebf2329bdbed926d3a36dec18b7592",
+      "signature": "a6890814d9a9e8cb7290a951d55b96a2a8970d160c70b7fbb5698e8e32cdc613abc7f13efb9f622e27970d6409d14ff4c264a6c56eb4eed0f1c535fe6f17bc02",
+      "cryptosuite": "https://sparq.dev/ns/zk#poseidon2-schnorr-v1",
+      "message": "0x2f4eab6eaa0d67ab8a9f06baa58d3d92c6b83134b6fdeb5d1413fd06f7a8389b",
+      "canonicalTriples": 18,
+      "status": {
+        "listIri": "https://verifications.example/status/zk-employment",
+        "version": 1,
+        "indexCommitment": "0x04b9e06f6e04469f85ebd6d9dc68db5e02d4827d41bd2e30b891687f49264b44"
+      }
+    }
+  }
+}

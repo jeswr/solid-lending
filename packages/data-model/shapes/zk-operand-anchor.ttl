@@ -1,0 +1,86 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cred: <https://www.w3.org/2018/credentials#> .
+@prefix sec: <https://w3id.org/security#> .
+@prefix lend: <urn:example:lend#> .
+@prefix lshape: <urn:example:lend-shape#> .
+
+# The issuer-signed operand-anchor VC that makes the Tier-A live filter
+# proofs of the next build round forgery-resistant. A bare filter proof is
+# fully forgeable (operand_enc is deterministic and salt-free); verifiers
+# MUST check anchor signature + issuer trust + status + subject WebID ==
+# authenticated presenter + anchor.operandEnc == proof public input +
+# challenge freshness. Never ship a Tier-A surface without the anchor check.
+lshape:ZkOperandAnchorShape
+  a sh:NodeShape ;
+  sh:targetClass lend:ZkOperandAnchor ;
+  sh:closed true ;
+  sh:ignoredProperties ( sec:proof ) ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue cred:VerifiableCredential ;
+  ] ;
+  sh:property [
+    sh:path cred:issuer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+  ] ;
+  sh:property [
+    sh:path cred:validFrom ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:dateTime ;
+    sh:lessThan cred:validUntil ;
+  ] ;
+  sh:property [
+    # Anchors are revoked via credentialStatus rather than expiring, but an
+    # explicit window is permitted.
+    sh:path cred:validUntil ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:dateTime ;
+  ] ;
+  sh:property [
+    sh:path cred:credentialStatus ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:BlankNodeOrIRI ;
+  ] ;
+  sh:property [
+    sh:path cred:credentialSubject ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node lshape:ZkOperandAnchorSubjectShape ;
+    sh:message "credentialSubject must be the holder WebID the verifier matches against the DPoP-bound session" ;
+  ] ;
+  sh:property [
+    sh:path cred:credentialSchema ;
+    sh:nodeKind sh:IRI ;
+  ] .
+
+lshape:ZkOperandAnchorSubjectShape
+  a sh:NodeShape ;
+  sh:closed true ;
+  sh:ignoredProperties ( rdf:type ) ;
+  sh:property [
+    # Only the three ZK scaled-unit fields are anchorable. This list must
+    # stay equal to ZK_FIELD_BUDGETS in src/zk-budgets.ts (test-enforced).
+    sh:path lend:field ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:in ( lend:netMonthlyIncomeUsd lend:cashFlowScoreValue lend:nsf90Count ) ;
+    sh:message "field must be one of the three ZK scaled-unit field IRIs" ;
+  ] ;
+  sh:property [
+    # Deterministic salt-free sparq term encoding: 0x-prefixed lowercase hex
+    # field element, equal to the filter circuit's public operand_enc input.
+    sh:path lend:operandEnc ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:pattern "^0x[0-9a-f]{1,64}$" ;
+    sh:message "operandEnc must be a 0x-prefixed lowercase hex field element" ;
+  ] .

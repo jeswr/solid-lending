@@ -1,0 +1,18 @@
+@prefix cred: <https://www.w3.org/2018/credentials#>.
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix dpv: <https://w3id.org/dpv#>.
+@prefix fibo-loan-ln-ln: <https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansGeneral/Loans/>.
+@prefix fibo-loan-spc-cns: <https://spec.edmcouncil.org/fibo/ontology/LOAN/LoansSpecific/ConsumerLoans/>.
+@prefix lend: <urn:example:lend#>.
+@prefix odrl: <http://www.w3.org/ns/odrl/2/>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
+@prefix schema: <https://schema.org/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+<https://maya.pod.example/lending/credentials/anchors/income> a cred:VerifiableCredential, lend:ZkOperandAnchor;
+    cred:issuer <https://verifications.example/orgs/income-verifier#id>;
+    cred:validFrom "2026-06-15T12:00:00.000Z"^^xsd:dateTime;
+    cred:credentialStatus <https://verifications.example/status/zk-anchors#7>;
+    cred:credentialSubject <https://maya.pod.example/profile/card#me>.
+<https://maya.pod.example/profile/card#me> lend:field lend:netMonthlyIncomeUsd;
+    lend:operandEnc "0x07b66a6df9e52198d3d823f29c5030fd9721dafcf31b7a44da67a0f21d3710b0".

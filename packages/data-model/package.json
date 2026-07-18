@@ -8,10 +8,18 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check:shapes": "vitest run"
+    "check:shapes": "node scripts/check-shapes.mjs",
+    "generate:shapes": "node scripts/generate-shapes.mjs",
+    "generate:vocab": "node scripts/generate-vocab.mjs"
   },
   "dependencies": {
-    "n3": "^2.0.3"
+    "@jeswr/rdf-serialize": "^0.1.0",
+    "@rdfjs/data-model": "^2.1.2",
+    "@rdfjs/dataset": "^2.0.3",
+    "@rdfjs/types": "^2.0.1",
+    "@rdfjs/wrapper": "^0.34.0",
+    "n3": "^2.0.3",
+    "shacl-engine": "^1.1.2"
   },
   "devDependencies": {
     "@types/n3": "^1.26.1",
