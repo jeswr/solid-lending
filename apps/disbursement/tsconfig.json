@@ -4,6 +4,7 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
     "allowJs": true,
+    "allowImportingTsExtensions": true,
     "plugins": [{ "name": "next" }]
   },
   "include": [

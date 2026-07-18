@@ -14,7 +14,11 @@
  *    loan-offer and repayment-history documents back into the pod, plus the
  *    repayment-authorization ODRL policy (scene 5, 12 CFR 1041 rails).
  *  - `disbursement` (Mastercard Send-modelled): identity for the payout
- *    target, write access for its receipt document (scene 4).
+ *    target, READ on the loan-offer document (the scene-4 funding
+ *    instruction — principal + subject WebID, per the fintech-lender's
+ *    origination module header; disbursement's own read path projects only
+ *    those two fields, never the full Reg Z disclosure), and write access
+ *    for its own receipt document (scene 4).
  */
 import type { ResourceId } from "./resources";
 
@@ -73,6 +77,7 @@ export const GRANT_PARTIES: Readonly<Record<GrantPartyId, GrantPartyDefinition>>
     envVar: "LENDING_DISBURSEMENT_SERVICE_WEBID",
     resources: [
       { resource: "identity", write: false },
+      { resource: "loanOffer", write: false },
       { resource: "disbursementReceipt", write: true },
     ],
   },
