@@ -7,32 +7,44 @@
  *
  * Two identity shapes:
  *
- * - `startDevUserIssuer` — Maya's OWN presenter. Mirrors `apps/bureau` and
- *   `apps/wallet`'s shared `test/support/caller-issuer.ts` (`createTestCallerIssuer`):
- *   ONE plain HTTP loopback listener serving both the WebID profile AND the
- *   OIDC discovery/JWKS/`.well-known` endpoints. The WebID claim is
- *   `https://127.0.0.1:<port>/profile#id` (structurally required by
- *   `@jeswr/solid-api-auth`'s `extractWebId` — no loopback exception), but
- *   the ISSUER string is deliberately `http://127.0.0.1:<port>` — the SAME
- *   port, plain HTTP: `@jeswr/solid-pod-guard`'s OWN default owner-binding
- *   fetch (L2, `resolveAuthorizedPod`) already rewrites a loopback `https:`
- *   WebID onto `http:` before ever dereferencing it under
- *   `allowInsecureLoopback` (no custom `ownerSeams` needed), and
- *   `@jeswr/solid-api-auth`'s bidirectional WebID<->issuer check
- *   (`bidirectionalMode = trustedIssuers.every(isLoopbackHttp) ? "warn" :
- *   "strict"`) only downgrades to non-blocking when the issuer itself is
- *   `http:` loopback — an `https:` issuer would force "strict" and then
- *   hard-require a GENUINE TLS dereference of this same profile, which a
- *   loopback-rewritten fetch can never satisfy. One plain-HTTP server
- *   satisfies both checks at once.
+ * - `startDevUserIssuer` — Maya's OWN presenter: the identity her session
+ *   presents to every zone app's own routes AND — sm-qz3j.8's revoke finding
+ *   — DIRECTLY TO THE POD ITSELF (ACL rewrites in `journey.spec.ts`'s
+ *   `putAcl`/`podBody`). The journey's pod boots `oidc: true` (real
+ *   Solid-OIDC + DPoP verification — see `journey.spec.ts`'s `beforeAll`);
+ *   the pod's own native OIDC verifier (`@solid/access-token-verifier`) has
+ *   NO loopback exception and hard-requires a GENUINE TLS dereference of the
+ *   WebID document, unlike `@jeswr/solid-pod-guard`'s app-level owner-binding
+ *   fetch (which rewrites a loopback `https:` WebID onto `http:` under
+ *   `allowInsecureLoopback`). So this runs a REAL HTTPS listener (a freshly
+ *   generated self-signed loopback cert via `openssl`,
+ *   `relaxTlsVerificationForTests()` trusting it for outbound fetches in
+ *   this process only) — exactly `apps/bank-lender/test/dev-issuer.ts`'s
+ *   proven `startDevUserIssuer` recipe (its own 30-test suite's "revocation
+ *   genuinely shuts the read off" acceptance test exercises this identical
+ *   shape against `oidc: true`). A plain-HTTP loopback issuer (the previous
+ *   shape here) satisfies `@jeswr/solid-api-auth`'s app-level "warn"
+ *   bidirectional check but can NEVER satisfy the pod's own strict-mode
+ *   verifier, so a revoke against such a pod can never be genuinely tested —
+ *   the sm-qz3j.8 root cause.
  * - `startDevServiceIssuer` — a zone app's OWN L4 service identity: a plain
  *   HTTP dev issuer implementing the `client_credentials` grant
  *   `@jeswr/solid-pod-guard`'s `createServicePodFetch` performs (mirrors
- *   `apps/bank-lender/test/dev-issuer.ts` and siblings).
+ *   `apps/bank-lender/test/dev-issuer.ts` and siblings). Plain HTTP is fine
+ *   here: this identity only ever presents to L1 app guards
+ *   (`@jeswr/solid-api-auth`'s lenient loopback "warn" mode) and to the pod
+ *   via each app's OWN `createServicePodFetch`, whose bearer token the pod
+ *   verifies the SAME way regardless — never via a direct WebID dereference
+ *   from this harness.
  */
+import { execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
+import { mkdtempSync, readFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
+import { createServer as createHttpsServer } from "node:https";
 import type { AddressInfo } from "node:net";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { Page } from "@playwright/test";
 import {
   calculateJwkThumbprint,
@@ -45,6 +57,48 @@ import {
 
 const TOKEN_LIFETIME_SECONDS = 300;
 const TOKEN_REFRESH_MS = 60_000;
+
+let tlsVerificationRelaxed = false;
+/**
+ * Trust this process's self-signed dev certs for outbound fetches. Scoped to
+ * the test process only (never production code): both Node's own `https`
+ * client and `@jeswr/guarded-fetch`'s underlying dispatcher consult this
+ * flag, and a self-signed loopback cert has no other way to be trusted
+ * without a real CA. Mirrors `apps/bank-lender/test/dev-issuer.ts`'s
+ * identical helper.
+ */
+function relaxTlsVerificationForTests(): void {
+  if (tlsVerificationRelaxed) return;
+  tlsVerificationRelaxed = true;
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
+
+/** Generate a fresh self-signed loopback TLS cert via the system `openssl` (dev/test only). */
+function generateSelfSignedCert(): { key: string; cert: string } {
+  const dir = mkdtempSync(join(tmpdir(), "lending-e2e-dev-issuer-"));
+  const keyPath = join(dir, "key.pem");
+  const certPath = join(dir, "cert.pem");
+  execFileSync("openssl", [
+    "req",
+    "-x509",
+    "-newkey",
+    "ec",
+    "-pkeyopt",
+    "ec_paramgen_curve:prime256v1",
+    "-keyout",
+    keyPath,
+    "-out",
+    certPath,
+    "-days",
+    "1",
+    "-nodes",
+    "-subj",
+    "/CN=localhost",
+    "-addext",
+    "subjectAltName=DNS:localhost,IP:127.0.0.1",
+  ]);
+  return { cert: readFileSync(certPath, "utf8"), key: readFileSync(keyPath, "utf8") };
+}
 
 function closeServer(server: Server): Promise<void> {
   server.closeAllConnections();
@@ -243,29 +297,21 @@ export interface BorrowerSession {
   authFetch: typeof fetch;
   /** Intercept the browser page's own requests matching `pattern`, attaching the SAME real DPoP auth. */
   authenticatePage(page: Page, pattern: string): Promise<void>;
-  /**
-   * Update the pim:storage claim the presenter's WebID profile serves. The
-   * presenter's WebID must be minted BEFORE the pod it owns can boot
-   * (`startSolidServer({ ownerWebid })`), but the pod's base URL is only
-   * known AFTER it boots — so the profile document reads this mutable cell
-   * rather than a value baked in at construction time.
-   */
-  setStorage(storage: string): void;
   stop(): Promise<void>;
 }
 
 /**
  * Start Maya's presenter — the identity Maya's session presents to every
- * zone app's own routes AND to the pod server directly. `storage` names her
- * pim:storage claim (the L2 forward binding the apps' `resolveAuthorizedPod`
- * reads) — the SEEDED pod's base URL. Optional at construction time (pass
- * `setStorage` once the pod exists) since a pod OWNED by this presenter's
- * WebID can only boot after the WebID itself is minted — a real
- * chicken-and-egg the mutable cell resolves.
+ * zone app's own routes AND directly to the pod server (real Solid-OIDC +
+ * DPoP over a REAL HTTPS loopback listener — see the module header). `storage`
+ * names her `pim:storage` claim (the L2 forward binding the apps'
+ * `resolveAuthorizedPod` reads) — the pod's base URL, so call this AFTER the
+ * pod boots (unlike the old fixed-owner-mode shape, the pod no longer needs
+ * this WebID to exist before it can start, since it is not the pod's
+ * bootstrap owner).
  */
-export async function startDevUserIssuer(
-  options: { storage?: string } = {},
-): Promise<BorrowerSession> {
+export async function startDevUserIssuer(options: { storage: string }): Promise<BorrowerSession> {
+  relaxTlsVerificationForTests();
   const issuerKeys = await generateKeyPair("ES256", { extractable: true });
   const issuerJwk = {
     ...(await exportJWK(issuerKeys.publicKey)),
@@ -279,16 +325,14 @@ export async function startDevUserIssuer(
 
   let issuer = "";
   let webId = "";
-  let storage = options.storage ?? "";
-
-  const server = createServer((request, response) => {
+  const { key, cert } = generateSelfSignedCert();
+  const server = createHttpsServer({ cert, key }, (request, response) => {
     if (request.url === "/profile" && request.method === "GET") {
       response.setHeader("content-type", "text/turtle");
-      const lines = [`<${webId}> <http://www.w3.org/ns/solid/terms#oidcIssuer> <${issuer}> .`];
-      if (storage !== "") {
-        lines.push(`<${webId}> <http://www.w3.org/ns/pim/space#storage> <${storage}> .`);
-      }
-      response.end(`${lines.join("\n")}\n`);
+      response.end(
+        `<${webId}> <http://www.w3.org/ns/solid/terms#oidcIssuer> <${issuer}> .\n` +
+          `<${webId}> <http://www.w3.org/ns/pim/space#storage> <${options.storage}> .\n`,
+      );
       return;
     }
     if (request.url === "/.well-known/openid-configuration" && request.method === "GET") {
@@ -304,13 +348,22 @@ export async function startDevUserIssuer(
     response.statusCode = 404;
     response.end();
   });
-  const port = await listenOnFreePort(server);
-  // Plain HTTP issuer, deliberately SAME port as the (rewritten) WebID — see
-  // the module header for why this is what makes BOTH the bidirectional
-  // issuer check and the L2 owner-binding fetch pass under
-  // `allowInsecureLoopback`.
-  issuer = `http://127.0.0.1:${port}`;
-  webId = `https://127.0.0.1:${port}/profile#id`;
+  // Bind via the "localhost" hostname (not the `listenOnFreePort` helper's
+  // 127.0.0.1), matching the cert's `DNS:localhost` SAN entry exactly —
+  // `apps/bank-lender/test/dev-issuer.ts`'s proven recipe.
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "localhost", resolve);
+  });
+  const address = server.address();
+  if (address === null || typeof address === "string") {
+    throw new Error("dev user issuer failed to bind a TCP port");
+  }
+  // REAL HTTPS, same origin for issuer + WebID — see the module header for
+  // why a genuine TLS dereference is required here (the pod's own OIDC
+  // verifier has no loopback exception).
+  issuer = `https://localhost:${address.port}`;
+  webId = `${issuer}/profile#id`;
 
   let cachedToken: { value: string; mintedAt: number } | undefined;
   async function accessToken(): Promise<string> {
@@ -377,9 +430,6 @@ export async function startDevUserIssuer(
           },
         });
       });
-    },
-    setStorage(value: string) {
-      storage = value;
     },
     stop: () => closeServer(server),
   };

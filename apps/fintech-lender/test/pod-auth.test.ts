@@ -224,7 +224,12 @@ beforeAll(async () => {
     trustedOidcIssuers: [presenter.issuer],
     trustForwardedHeaders: false,
   };
-  service = createPodRailService({ config, now: () => NOW, ownerSeams: OWNER_SEAMS });
+  service = createPodRailService({
+    config,
+    now: () => NOW,
+    ownerSeams: OWNER_SEAMS,
+    publicRequestUrl: (request) => request.url,
+  });
   route = await serveHandler((request) => {
     const url = new URL(request.url);
     if (url.pathname.endsWith("/application/submit")) return service.applicationSubmit(request);
@@ -253,6 +258,7 @@ describe("boundary rejections", () => {
 
   test("an unconfigured service identity fails closed (503) — never anonymous IO", async () => {
     const unconfigured = createPodRailService({
+      publicRequestUrl: (request) => request.url,
       config: { ...config, podServiceClientSecret: undefined },
       now: () => NOW,
       ownerSeams: OWNER_SEAMS,
@@ -272,6 +278,7 @@ describe("boundary rejections", () => {
 describe("the grant boundary is the pod's own WAC", () => {
   test("a service identity the grant does not name is denied by the pod — no offer written", async () => {
     const rogue = createPodRailService({
+      publicRequestUrl: (request) => request.url,
       config: {
         ...config,
         podServiceClientId: ROGUE_CLIENT.clientId,

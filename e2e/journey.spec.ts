@@ -85,10 +85,12 @@ function seededIssuerWebId(role: keyof typeof ISSUER_ROLES): string {
   return `${podOrigin}${ISSUER_ROLES[role].docPath}`;
 }
 
-/** GET one pod resource's body (fixed-owner-mode: unauthenticated = owner). */
+/** GET one pod resource's body, authenticated as the borrower (the resource's
+ * real ACL owner — see `putAcl`'s header for why this is no longer an
+ * owner-bypass read). */
 async function podBody(path: string): Promise<string> {
   const relative = path.startsWith("/") ? path.slice(1) : path;
-  const response = await fetch(`${podBase}${relative}`);
+  const response = await borrower.authFetch(`${podBase}${relative}`);
   expect(response.status, `GET ${relative}`).toBe(200);
   return response.text();
 }
@@ -109,9 +111,25 @@ function authorizationBlock(
 `;
 }
 
-/** PUT a full ACL document (fixed-owner-mode plain fetch — the seed-time owner acts unauthenticated). */
-async function putAcl(resourceIri: string, authorizations: string): Promise<void> {
-  const response = await fetch(`${resourceIri}.acl`, {
+/**
+ * PUT a full ACL document — the pod runs real Solid-OIDC + DPoP verification
+ * (`startSolidServer({ oidc: true })`); there is no unauthenticated-owner
+ * bypass. Defaults to `borrower.authFetch`: `@jeswr/solid-seed` names
+ * `target.webid` (== `borrower.webid`) as every SEEDED resource's owner
+ * (Read/Write/Control preserved — see `@jeswr/solid-seed`'s SKILL.md
+ * "Access control and tests"), so the borrower's own session genuinely holds
+ * `acl:Control` there. The `/lending/` CONTAINER itself was never seeded as
+ * its own resource (only the credentials inside it were), so borrower has no
+ * standing ACL to rewrite there yet — that ONE call passes `primary.authFetch`
+ * (the pod's bootstrap admin) to author the container's FIRST-EVER ACL,
+ * which itself names borrower as `#owner` going forward.
+ */
+async function putAcl(
+  resourceIri: string,
+  authorizations: string,
+  authFetch: typeof fetch = borrower.authFetch,
+): Promise<void> {
+  const response = await authFetch(`${resourceIri}.acl`, {
     method: "PUT",
     headers: { "content-type": "text/turtle" },
     body: `@prefix acl: <http://www.w3.org/ns/auth/acl#> .\n\n${authorizations}`,
@@ -146,22 +164,37 @@ async function walletGrant(
 test.beforeAll(async ({}, testInfo) => {
   // Booting six real `next dev` servers is minutes, not seconds.
   testInfo.setTimeout(300_000);
-  // 1. Maya's own presenter (WebID + OIDC issuer) — minted BEFORE the pod so
-  //    `startSolidServer({ownerWebid})` can name her as owner.
-  borrower = await startDevUserIssuer();
-
-  // 2. A DEDICATED pod, fixed-owner mode, owned by Maya's real DPoP WebID —
-  //    unauthenticated (seed-time) requests are auto-granted owner access;
-  //    AUTHENTICATED (real DPoP) requests are WAC-evaluated normally against
-  //    whatever ACL actually names them, so every subsequent grant in this
-  //    journey is a REAL access-control transition, never a fixed-owner
-  //    bypass in disguise.
-  pod = await startSolidServer({ ownerWebid: borrower.webid });
+  // 1. A DEDICATED pod running REAL Solid-OIDC + DPoP verification
+  //    (`oidc: true` — mirrors every app's own isolated pod-auth suite, e.g.
+  //    `apps/bank-lender/test/pod-auth.test.ts`'s `startSolidServer({ oidc:
+  //    true })`). `pod.accounts[0]` ("primary" below) is test-kit's OWN
+  //    self-provisioned identity — an ADMINISTRATIVE writer only, used to
+  //    seed content and author ACLs. It is NEVER the resource owner named
+  //    IN those ACLs: `@jeswr/solid-seed` and this file's own `putAcl`
+  //    always name `borrower.webid` (Maya's REAL, externally-managed DPoP
+  //    identity, minted next) as the owner (Read/Write/Control preserved —
+  //    see `@jeswr/solid-seed`'s SKILL.md "Access control and tests"), so
+  //    every subsequent grant/revoke in this journey is a REAL access-
+  //    control transition the pod itself enforces against whichever
+  //    identity the CURRENT ACL actually names — never an owner-bypass in
+  //    disguise. (A fixed-owner-mode pod — the previous shape here — treats
+  //    EVERY request, authenticated or not, as the owner:
+  //    `packages/test-kit`'s own harness doc says so outright ["every
+  //    request acts as the pod owner — no authentication"], which is why a
+  //    revoke against such a pod can never actually take effect —
+  //    sm-qz3j.8 finding.)
+  pod = await startSolidServer({ oidc: true });
   const primary = pod.accounts[0];
   if (primary === undefined) throw new Error("pod booted with no primary account");
   podOrigin = new URL(primary.baseUrl).origin;
   podBase = `${podOrigin}/`;
-  borrower.setStorage(podBase);
+
+  // 2. Maya's own presenter (WebID + OIDC issuer over a REAL HTTPS loopback
+  //    listener — see `./support/dev-issuers.ts`'s module header for why —
+  //    minted AFTER the pod so her `pim:storage` claim can name its base URL
+  //    directly, no chicken-and-egg mutable cell needed now that she is not
+  //    the pod's bootstrap owner).
+  borrower = await startDevUserIssuer({ storage: podBase });
 
   // 3. The pod's own backward-acknowledgement profile card (L2's bidirectional check).
   await seedPod(
@@ -261,6 +294,7 @@ test.beforeAll(async ({}, testInfo) => {
         "acl:Read, acl:Write",
         true,
       ),
+    primary.authFetch,
   );
 
   const seededCredentialAgents: Readonly<Record<string, readonly [string, string][]>> = {
@@ -308,7 +342,7 @@ test.beforeAll(async ({}, testInfo) => {
     provisionPodHostedIssuer({
       docPath: "/lending/issuers/e2e-fintech-lender",
       now: seededAt,
-      ownerFetch: primary.authFetch,
+      ownerFetch: borrower.authFetch,
       ownerWebId: borrower.webid,
       podOrigin,
       statusPath: "/lending/status/e2e-fintech-lender",
@@ -316,7 +350,7 @@ test.beforeAll(async ({}, testInfo) => {
     provisionPodHostedIssuer({
       docPath: "/lending/issuers/e2e-disbursement",
       now: seededAt,
-      ownerFetch: primary.authFetch,
+      ownerFetch: borrower.authFetch,
       ownerWebId: borrower.webid,
       podOrigin,
       statusPath: "/lending/status/e2e-disbursement",
@@ -324,7 +358,7 @@ test.beforeAll(async ({}, testInfo) => {
     provisionPodHostedIssuer({
       docPath: "/lending/issuers/e2e-fresh-identity",
       now: seededAt,
-      ownerFetch: primary.authFetch,
+      ownerFetch: borrower.authFetch,
       ownerWebId: borrower.webid,
       podOrigin,
       statusPath: "/lending/status/e2e-fresh-identity",
@@ -469,17 +503,6 @@ test.afterAll(async () => {
 test("scene 1: verify-on-view over the seeded vault, then a REAL re-issue through the live rail", async ({
   page,
 }) => {
-  // TEMP DEBUG
-  page.on("console", (msg) => console.log("TEMP DEBUG console", msg.type(), msg.text()));
-  // TEMP DEBUG
-  page.on("response", (res) => {
-    if (res.url().includes("/api/")) console.log("TEMP DEBUG response", res.status(), res.url());
-  });
-  // TEMP DEBUG
-  page.on("requestfailed", (req) =>
-    console.log("TEMP DEBUG requestfailed", req.url(), req.failure()?.errorText),
-  );
-
   // Every zone surface visited carries the trust frame.
   await page.goto(`${origins.wallet}/wallet/credentials`);
   await acknowledgeInterstitial(page);
@@ -487,7 +510,11 @@ test("scene 1: verify-on-view over the seeded vault, then a REAL re-issue throug
 
   await page.getByRole("button", { name: "Load + verify credentials" }).click();
   const cards = page.locator("[data-credential-card]");
-  await expect(cards).toHaveCount(5);
+  // A cold `next dev` Turbopack compile of `/api/dev/credentials` (first hit
+  // of this run) plus five real fail-closed `verifyCredential` gate chains
+  // comfortably exceeds the 5s default — never a hang (see
+  // `../apps/wallet/lib/server/credential-summary.ts`'s pod-fetch timeout).
+  await expect(cards).toHaveCount(5, { timeout: 60_000 });
   const statuses = await page.locator("[data-credential-status]").allTextContents();
   expect(statuses.length).toBe(5);
   for (let index = 0; index < 5; index += 1) {
@@ -502,9 +529,9 @@ test("scene 1: verify-on-view over the seeded vault, then a REAL re-issue throug
   // proven), then the branded flow re-fills it through the real rail —
   // driven from the UI with the borrower's real DPoP session.
   const identityIri = `${podBase}${RESOURCE_POD_PATHS["identity-credential"].slice(1)}`;
-  const deleted = await fetch(identityIri, { method: "DELETE" });
+  const deleted = await borrower.authFetch(identityIri, { method: "DELETE" });
   expect([200, 204, 205].includes(deleted.status), `DELETE identity: ${deleted.status}`).toBe(true);
-  expect((await fetch(identityIri)).status).toBe(404);
+  expect((await borrower.authFetch(identityIri)).status).toBe(404);
 
   await borrower.authenticatePage(page, "**/verifications/api/**");
   await page.goto(`${origins.verifications}/verifications/identity`);

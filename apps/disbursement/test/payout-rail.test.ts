@@ -242,13 +242,18 @@ async function revokeOfferRead(): Promise<void> {
 }
 
 /**
- * Grant `agentWebid` WRITE-only default access over `/lending/` — the
+ * Grant `agentWebid` Read + Write default access over `/lending/` — the
  * receipt resource does not exist yet, so its creation is authorized against
  * the nearest container's effective ACL (mirrors the sibling apps' identical
- * `grantContainerWrite`). READ stays scoped to the SPECIFIC resources this
- * app is actually granted (the loan offer, above) — never the whole
- * container — matching the wallet's least-privilege catalogue (disbursement:
- * identity read, loanOffer read, disbursementReceipt write).
+ * `grantContainerWrite`, e.g. `apps/fintech-lender/test/pod-auth.test.ts`).
+ * READ is required here (not write-only): `createPodTurtle`
+ * (`../lib/server/pod-io.ts`) reads the target before writing so it can tell
+ * the wallet grant engine's EMPTY write-grant PLACEHOLDER
+ * (`apps/wallet/lib/grants/engine.ts`'s `ensureResourcePlaceholder` — WAC
+ * evaluates a resource CREATE against the parent container, so a
+ * not-yet-existing resource's own Write grant is otherwise inert) apart from
+ * a GENUINE prior receipt — mirrors the REAL wallet engine, which always
+ * grants `acl:Read, acl:Write` together on every write grant.
  */
 async function grantContainerCreate(agentWebid: string): Promise<void> {
   const response = await borrower.authFetch(`${podRoot}/lending/.acl`, {
@@ -266,7 +271,7 @@ async function grantContainerCreate(agentWebid: string): Promise<void> {
     acl:accessTo </lending/> ;
     acl:default </lending/> ;
     acl:agent <${agentWebid}> ;
-    acl:mode acl:Write .
+    acl:mode acl:Read, acl:Write .
 `,
     headers: { "content-type": "text/turtle" },
     method: "PUT",
@@ -355,6 +360,7 @@ beforeAll(async () => {
 
   config = buildConfig();
   service = createPayoutRailService({
+    publicRequestUrl: (request) => request.url,
     config,
     issuerKey: receiptKey,
     now: () => NOW,
@@ -389,6 +395,7 @@ describe("boundary rejections", () => {
 
   test("an unconfigured pod service identity fails closed (503)", async () => {
     const unconfigured = createPayoutRailService({
+      publicRequestUrl: (request) => request.url,
       config: { ...config, podServiceClientSecret: undefined },
       issuerKey: receiptKey,
       now: () => NOW,
@@ -406,6 +413,7 @@ describe("boundary rejections", () => {
 
   test("an unconfigured offer-issuer trust list fails closed (503)", async () => {
     const unconfigured = createPayoutRailService({
+      publicRequestUrl: (request) => request.url,
       config: { ...config, trustedOfferIssuers: [] },
       issuerKey: receiptKey,
       now: () => NOW,
@@ -431,6 +439,7 @@ describe("boundary rejections", () => {
       }),
     );
     const unconfigured = createPayoutRailService({
+      publicRequestUrl: (request) => request.url,
       config: { ...config, issuerKeyJwk: undefined, statusListUrl: undefined },
       now: () => NOW,
       offerSeams: offerSeams(),
@@ -461,6 +470,7 @@ describe("the grant boundary is the pod's own WAC", () => {
       }),
     );
     const rogue = createPayoutRailService({
+      publicRequestUrl: (request) => request.url,
       config: {
         ...config,
         podServiceClientId: ROGUE_CLIENT.clientId,

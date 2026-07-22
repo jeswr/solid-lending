@@ -129,6 +129,7 @@ beforeAll(async () => {
     },
   };
   service = createWalletGrantService({
+    publicRequestUrl: (request) => request.url,
     config,
     // Real WAC IO through the pod's own native OIDC identity (module header:
     // the service-identity client_credentials handshake itself is
@@ -210,6 +211,7 @@ describe("boundary rejections", () => {
   test("an unconfigured service identity fails closed 503 (never anonymous IO)", async () => {
     const unconfiguredServer = await startFetchServer((request) => {
       const unconfigured = createWalletGrantService({
+        publicRequestUrl: (request) => request.url,
         config: { ...config, serviceWebId: undefined, podServiceClientSecret: undefined },
       });
       return unconfigured.ledger(request);

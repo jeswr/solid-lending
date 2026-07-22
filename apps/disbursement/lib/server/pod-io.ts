@@ -86,21 +86,60 @@ export async function podResourceExists(iri: string, podFetch: typeof fetch): Pr
 }
 
 /**
- * Strict-create a Turtle resource — NEVER overwrites. The disbursement
- * receipt is a one-shot fact: a payout that races (or repeats) must never
- * silently replace a prior receipt, so every write is `If-None-Match: *` and
- * a conflicting concurrent create loses loudly (409), not silently.
+ * Create-once-write a Turtle resource for the one-shot disbursement receipt:
+ * a payout that races (or repeats) against a GENUINE prior receipt must never
+ * silently replace it (409, loud). This tolerates one specific, EXPECTED
+ * prior state: the wallet's grant engine (`ensureResourcePlaceholder`,
+ * `apps/wallet/lib/grants/engine.ts`) idempotently PUTs an EMPTY placeholder
+ * at this exact path the moment `disbursementReceipt` is write-granted — WAC
+ * evaluates a resource CREATE against the PARENT container, so a
+ * not-yet-existing resource's own Write grant is otherwise inert. That
+ * placeholder is not a receipt; a blind `If-None-Match: *` would 409 against
+ * it on EVERY real payout, which is a bug, not idempotency. So: read first —
+ * 404 strict-creates; a NON-EMPTY existing body is a genuine prior receipt
+ * (409, no write attempted); an EMPTY existing body is the placeholder and is
+ * safely replaced via `If-Match` on its own current ETag (still race-safe: a
+ * concurrent write loses loudly, never silently).
  */
 export async function createPodTurtle(
   iri: string,
   body: string,
   podFetch: typeof fetch,
 ): Promise<void> {
+  let existing: Response;
+  try {
+    existing = await podFetch(iri, {
+      headers: { accept: "text/turtle" },
+      method: "GET",
+      redirect: "error",
+    });
+  } catch {
+    throw new PodAccessError(502, "could not reach the pod");
+  }
+  const headers: Record<string, string> = { "content-type": "text/turtle" };
+  if (existing.status === 404) {
+    headers["if-none-match"] = "*";
+  } else if (existing.ok) {
+    const priorBody = await existing.text();
+    if (priorBody.trim() !== "") {
+      throw new PodAccessError(409, "the disbursement receipt was already created concurrently");
+    }
+    const etag = existing.headers.get("etag");
+    if (etag !== null) {
+      // A concurrent real write racing this one still loses loudly below.
+      headers["if-match"] = etag;
+    }
+    // No ETag on the empty placeholder: write unconditionally rather than
+    // guessing wrong (matches the sibling apps' `writePodTurtle` fallback).
+  } else {
+    throw new PodAccessError(502, `pod read ${iri} failed: ${existing.status}`);
+  }
+
   let response: Response;
   try {
     response = await podFetch(iri, {
       body,
-      headers: { "content-type": "text/turtle", "if-none-match": "*" },
+      headers,
       method: "PUT",
       redirect: "error",
     });

@@ -19,14 +19,16 @@
  *      problem: missing, malformed, unverified, unbound, or expired
  *      (`funding-instruction.ts`);
  *   5. on a verified offer, runs the deterministic simulated payout and
- *      signs + strict-creates the Disbursement Receipt VC into the pod — a
- *      repeat call against an already-funded loan is refused (409), never a
- *      second payout. There is deliberately NO pre-flight existence GET: the
- *      wallet's grant catalogue gives this rail WRITE-only access to its own
- *      receipt path (no Read) — a bare GET would itself be denied — so
- *      idempotency is enforced purely by the strict-create PUT's own
- *      `If-None-Match: *` precondition (`pod-io.ts`'s `createPodTurtle`,
- *      lowered to 409 here).
+ *      signs + create-once-writes the Disbursement Receipt VC into the pod —
+ *      a repeat call against an already-funded loan is refused (409), never a
+ *      second payout. A pre-flight read IS required: the wallet's grant
+ *      engine (`ensureResourcePlaceholder`) idempotently PUTs an EMPTY
+ *      placeholder at the receipt path the moment it is write-granted (WAC
+ *      evaluates a resource CREATE against the parent container, so a
+ *      not-yet-existing resource's own Write grant is otherwise inert) —
+ *      `pod-io.ts`'s `createPodTurtle` reads first to tell that placeholder
+ *      apart from a GENUINE prior receipt (409, no write attempted) before
+ *      safely replacing it (`If-Match` on its own current ETag).
  *
  * Fail-closed invariants (do NOT weaken): unconfigured OIDC-issuer allowlist
  * ⇒ 503; unconfigured service identity ⇒ 503; unconfigured issuer signing
@@ -63,6 +65,7 @@ import {
   ensureStatusList,
   type ReceiptIssuerRuntime,
 } from "./receipt-issuer";
+import { publicRequestUrl as defaultPublicRequestUrl } from "./url";
 
 export interface PayoutRailServiceOptions {
   readonly config: DisbursementConfig;
@@ -82,6 +85,8 @@ export interface PayoutRailServiceOptions {
    * test fixture needs it skipped.
    */
   readonly ownerSeams?: OwnerBindingSeams;
+  /** Public-URL reconstruction for the DPoP `htu` binding. Defaults to this app's basePath. */
+  readonly publicRequestUrl?: (request: Request) => string;
 }
 
 export interface PayoutReport {
@@ -131,6 +136,7 @@ export function createPayoutRailService(options: PayoutRailServiceOptions): Payo
     options.guard ??
     createPodRouteGuard({
       config,
+      publicRequestUrl: options.publicRequestUrl ?? defaultPublicRequestUrl,
       ...(options.ownerSeams !== undefined ? { ownerSeams: options.ownerSeams } : {}),
     });
 
