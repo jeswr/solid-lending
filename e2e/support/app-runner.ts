@@ -1,13 +1,25 @@
 /**
- * Boots a zone app's REAL Next.js dev server as a child process on a
+ * Boots a zone app's REAL Next.js server (dev OR a pre-built production
+ * server — see `StartAppOptions.command`) as a child process on a
  * dynamically-assigned loopback port, waits for `/api/health` (every zone
  * app exposes one via `@jeswr/solid-showcase/next`'s `healthRoute` — see
  * each app's own `app/api/health/route.ts`), and tears every started app
  * down together. One `AppRunner` per journey run; apps are booted ONCE per
- * suite (never per test) — a fresh `next dev` cold start is seconds, too
- * slow to pay per scene.
+ * suite (never per test) — a fresh cold start is seconds, too slow to pay
+ * per scene.
+ *
+ * `command: "start"` (production) vs the default `"dev"`: sm-qz3j.8 found
+ * that six concurrent `next dev` Turbopack servers, EACH cold-compiling
+ * every route on first hit, starve this box's 2 CPU cores badly enough that
+ * the in-process WASM pod's DPoP-proof freshness check starts losing the
+ * race — `createServicePodFetch` gets a persistent `401 invalid_token`,
+ * reproducible ONLY under the full six-app run, never any app in isolation.
+ * `next start` does ZERO per-request compilation (the app must already be
+ * built — see `buildApps` below), which removes that CPU-starvation source
+ * entirely. `journey.spec.ts` passes `command: "start"`.
  */
 import { type ChildProcess, spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import path from "node:path";
@@ -109,6 +121,20 @@ export interface StartAppOptions {
   /** The app's own `basePath` (`next.config.ts`), e.g. `/bank-lender`. */
   readonly basePath: string;
   readonly env: NodeJS.ProcessEnv;
+  /**
+   * `"dev"` (default) runs `next dev` — every route pays a Turbopack
+   * compile on first hit. `"start"` runs `next start` against an ALREADY
+   * built `.next/` (see `buildApps`) — no per-request compilation, which is
+   * what the six-app journey needs to avoid starving the pod's DPoP check
+   * (see this module's header). `next.config.ts`'s own static config
+   * (`basePath`, `serverExternalPackages`, …) is baked in at BUILD time
+   * either way; the `env` passed here is read lazily at REQUEST time by
+   * each app's `lib/server/config.ts` (never at module-load/build time —
+   * verified against every journey app before wiring this in), so
+   * service-identity/pod env is safe to pass at start time under `"start"`
+   * exactly as it was under `"dev"`.
+   */
+  readonly command?: "dev" | "start";
 }
 
 export class AppRunner {
@@ -126,7 +152,15 @@ export class AppRunner {
 
     const child = spawn(
       "pnpm",
-      ["--filter", options.packageName, "dev", "--hostname", "127.0.0.1", "--port", String(port)],
+      [
+        "--filter",
+        options.packageName,
+        options.command ?? "dev",
+        "--hostname",
+        "127.0.0.1",
+        "--port",
+        String(port),
+      ],
       {
         cwd: REPO_ROOT,
         env: { ...process.env, ...options.env },
@@ -183,4 +217,52 @@ export class AppRunner {
 
 export function repoPath(...segments: readonly string[]): string {
   return path.join(REPO_ROOT, ...segments);
+}
+
+/**
+ * Build every listed zone app's production bundle ONCE, sequentially — a
+ * prerequisite for `AppRunner.start({ command: "start" })` (see this
+ * module's header for why production mode matters). Sequential, not
+ * `Promise.all`: this box has 2 CPU cores, and six concurrent Turbopack
+ * builds risk OOM/thrash worse than paying six builds back-to-back.
+ *
+ * Each `packageName` (`@lending/app-<dir>`) is expected to live at
+ * `apps/<dir>` — true for every journey app today. Skips any app whose
+ * `.next/BUILD_ID` already exists: a "beforeAll guard" so repeat local runs
+ * (this suite's own iteration loop) don't pay a ~40s rebuild per app when
+ * nothing changed. A genuinely fresh checkout (CI) has no `.next/` yet, so
+ * this guard never masks staleness there — it only skips work that would
+ * reproduce byte-identical output.
+ */
+export async function buildApps(
+  packageNames: readonly string[],
+  log: (message: string) => void = () => {},
+): Promise<void> {
+  for (const packageName of packageNames) {
+    const appDir = packageName.replace(/^@lending\/app-/, "");
+    const buildIdPath = repoPath("apps", appDir, ".next", "BUILD_ID");
+    if (existsSync(buildIdPath)) {
+      log(`[build] ${packageName}: .next/BUILD_ID already present, skipping`);
+      continue;
+    }
+    log(`[build] ${packageName}: building...`);
+    const started = Date.now();
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn("pnpm", ["--filter", packageName, "build"], {
+        cwd: REPO_ROOT,
+        env: process.env,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      const output: string[] = [];
+      child.stdout?.on("data", (chunk: Buffer) => output.push(chunk.toString()));
+      child.stderr?.on("data", (chunk: Buffer) => output.push(chunk.toString()));
+      child.once("error", reject);
+      child.once("exit", (code) => {
+        if (code === 0) resolve();
+        else
+          reject(new Error(`build failed for ${packageName} (exit ${code})\n${output.join("")}`));
+      });
+    });
+    log(`[build] ${packageName}: done in ${Math.round((Date.now() - started) / 1000)}s`);
+  }
 }

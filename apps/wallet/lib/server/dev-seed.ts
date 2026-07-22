@@ -18,8 +18,26 @@ const PREFIX = "LENDING";
 export class DevSeedUnavailableError extends Error {}
 export class DevSeedUnconfiguredError extends Error {}
 
-/** Whether this dev-only surface may run at all — production always refuses. */
+/**
+ * Whether this dev-only surface may run at all. Real deployments (Vercel
+ * prod, or any operator who never sets the override below) always refuse —
+ * `NODE_ENV !== "production"` is the default gate.
+ *
+ * `LENDING_WALLET_ALLOW_DEV_SURFACES=1` is a NARROW, explicit override for
+ * exactly one situation: `next start` (a production BUILD, run for its own
+ * reason — see `e2e/support/app-runner.ts`'s header, sm-qz3j.8) hardcodes
+ * `NODE_ENV=production` in the server process regardless of what env the
+ * parent passes it — Next.js does not allow un-forcing this. Since this
+ * scaffold's ONLY way to exercise verify-on-view today is this dev-gated
+ * route (see this module's header — no in-browser WASM pod runtime yet),
+ * running the e2e journey against a production build would otherwise make
+ * `/api/dev/credentials` permanently 404, independent of whether the
+ * feature it stands in for actually works. The override changes nothing
+ * about the fail-closed default: unset (every real deployment), this
+ * function behaves EXACTLY as before.
+ */
 export function devSeedAllowed(): boolean {
+  if (process.env.LENDING_WALLET_ALLOW_DEV_SURFACES === "1") return true;
   return process.env.NODE_ENV !== "production";
 }
 

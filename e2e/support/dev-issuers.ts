@@ -113,10 +113,28 @@ async function readBody(request: import("node:http").IncomingMessage): Promise<s
   return Buffer.concat(chunks).toString("utf8");
 }
 
+/**
+ * Bind on the "localhost" HOSTNAME, never the "127.0.0.1" literal —
+ * `@solid/access-token-verifier`'s `verifySecureUriClaim` (the pod's real
+ * OIDC verifier, `oidc: true`) accepts `https:` OR `http:` ONLY when
+ * `url.hostname`'s last dot-label is exactly `"localhost"`
+ * (`verifySecureUriClaim.js`: `url.hostname.split(".").pop() ===
+ * "localhost"`) — a bare IP literal fails that check unconditionally,
+ * regardless of load, timing, or concurrency. `startDevServiceIssuer`'s
+ * webid (`<issuer>/profile#id`) is exactly the claim this check runs
+ * against, so minting it on `127.0.0.1` made EVERY `createServicePodFetch`
+ * read 401 with `invalid_token`, deterministically, 100% of the time — the
+ * real cause of sm-qz3j.8's "resource contention" 401, not CPU starvation
+ * (confirmed: the failure reproduced identically under `next start`
+ * production mode AND with the credential reads made fully sequential,
+ * ruling out both Turbopack-compile starvation and DPoP-proof-concurrency
+ * races). Matches `startDevUserIssuer`'s already-correct
+ * `server.listen(0, "localhost", ...)` bind below.
+ */
 function listenOnFreePort(server: Server): Promise<number> {
   return new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(0, "127.0.0.1", () => {
+    server.listen(0, "localhost", () => {
       const address = server.address() as AddressInfo | null;
       if (address === null) {
         reject(new Error("dev issuer failed to bind a TCP port"));
@@ -280,7 +298,8 @@ export async function startDevServiceIssuer(options: {
     });
   });
   const port = await listenOnFreePort(server);
-  issuer = `http://127.0.0.1:${port}`;
+  // "localhost", NOT "127.0.0.1" — see `listenOnFreePort`'s header.
+  issuer = `http://localhost:${port}`;
   webId = `${issuer}/profile#id`;
 
   return {

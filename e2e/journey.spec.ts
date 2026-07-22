@@ -32,7 +32,7 @@ import {
 } from "@lending/test-kit";
 import { exportPrivateJwk, verifyCredential } from "@lending/vc-kit";
 import { expect, test } from "@playwright/test";
-import { AppRunner } from "./support/app-runner";
+import { AppRunner, buildApps } from "./support/app-runner";
 import { acknowledgeInterstitial, expectAxeClean, expectBannerVisible } from "./support/banners";
 import {
   type BorrowerSession,
@@ -76,6 +76,24 @@ const origins = {
 
 /** Scene 3's fintech-lender offer IRI, read in scene 3 and reused by scenes 4/5. */
 let offerIri = "";
+
+/**
+ * The six journey apps, built ONCE (sequentially) before `AppRunner.start`
+ * boots any of them in production mode — see `app-runner.ts`'s header for
+ * why: six concurrent `next dev` Turbopack cold-compiles starve this box's
+ * 2 CPU cores badly enough that the pod's DPoP-proof freshness check loses
+ * the race (a persistent 401 on `createServicePodFetch`, sm-qz3j.8,
+ * reproducible ONLY under the full six-app run). `next start` serves an
+ * already-built bundle with zero per-request compilation.
+ */
+const JOURNEY_PACKAGES = [
+  "@lending/app-verifications",
+  "@lending/app-wallet",
+  "@lending/app-bank-lender",
+  "@lending/app-fintech-lender",
+  "@lending/app-bureau",
+  "@lending/app-disbursement",
+] as const;
 
 if (PERSONA_VALUES.find((persona) => persona.id === "maya-torres") === undefined) {
   throw new Error("PERSONA_VALUES has no maya-torres entry — the seeded pod would be wrong");
@@ -162,8 +180,17 @@ async function walletGrant(
 
 // biome-ignore lint/correctness/noEmptyPattern: Playwright requires object-destructuring the first (fixtures) param even when unused.
 test.beforeAll(async ({}, testInfo) => {
-  // Booting six real `next dev` servers is minutes, not seconds.
-  testInfo.setTimeout(300_000);
+  // Building six apps sequentially (~40s each cold, ~0s warm via the
+  // `.next/BUILD_ID` guard) PLUS booting six real production servers is
+  // minutes, not seconds.
+  testInfo.setTimeout(900_000);
+
+  // 0. Build every journey app BEFORE anything else in this hook — build
+  //    time is CPU-bound (Turbopack) and must not overlap the pod's own
+  //    DPoP-sensitive crypto work below, or it reproduces the exact
+  //    starvation this production-mode switch exists to avoid.
+  await buildApps([...JOURNEY_PACKAGES], (message) => console.log(message));
+
   // 1. A DEDICATED pod running REAL Solid-OIDC + DPoP verification
   //    (`oidc: true` — mirrors every app's own isolated pod-auth suite, e.g.
   //    `apps/bank-lender/test/pod-auth.test.ts`'s `startSolidServer({ oidc:
@@ -403,6 +430,7 @@ test.beforeAll(async ({}, testInfo) => {
           LENDING_VERIFICATIONS_SERVICE_WEBID: verificationsService.webId,
         },
         packageName: "@lending/app-verifications",
+        command: "start",
       }),
       runner.start({
         basePath: "/wallet",
@@ -411,6 +439,14 @@ test.beforeAll(async ({}, testInfo) => {
           LENDING_BANK_LENDER_SERVICE_WEBID: bankService.webId,
           LENDING_DISBURSEMENT_SERVICE_WEBID: disbursementService.webId,
           LENDING_FINTECH_LENDER_SERVICE_WEBID: fintechService.webId,
+          // `next start` (production mode — see app-runner.ts's header)
+          // hardcodes `NODE_ENV=production`, which would otherwise 404
+          // `/api/dev/credentials` (scene 1's ONLY way to exercise
+          // verify-on-view today — see `lib/server/dev-seed.ts`'s header).
+          // This override is narrow and fail-closed by default: unset (every
+          // real deployment), the route stays production-disabled exactly as
+          // before.
+          LENDING_WALLET_ALLOW_DEV_SURFACES: "1",
           LENDING_SEED_POD_URL: podOrigin,
           LENDING_SEED_WEBID: borrower.webid,
           LENDING_WALLET_POD_SERVICE_CLIENT_ID: walletClient.clientId,
@@ -419,6 +455,7 @@ test.beforeAll(async ({}, testInfo) => {
           LENDING_WALLET_SERVICE_WEBID: walletService.webId,
         },
         packageName: "@lending/app-wallet",
+        command: "start",
       }),
       runner.start({
         basePath: "/bank-lender",
@@ -431,6 +468,7 @@ test.beforeAll(async ({}, testInfo) => {
           LENDING_TRUSTED_CREDENTIAL_ISSUERS: trustedCredentialIssuers,
         },
         packageName: "@lending/app-bank-lender",
+        command: "start",
       }),
       runner.start({
         basePath: "/fintech-lender",
@@ -447,6 +485,7 @@ test.beforeAll(async ({}, testInfo) => {
           LENDING_TRUSTED_CREDENTIAL_ISSUERS: trustedCredentialIssuers,
         },
         packageName: "@lending/app-fintech-lender",
+        command: "start",
       }),
       runner.start({
         basePath: "/bureau",
@@ -459,6 +498,7 @@ test.beforeAll(async ({}, testInfo) => {
           LENDING_BUREAU_TRUSTED_FURNISHERS: fintechIssuer.webId,
         },
         packageName: "@lending/app-bureau",
+        command: "start",
       }),
       runner.start({
         basePath: "/disbursement",
@@ -475,6 +515,7 @@ test.beforeAll(async ({}, testInfo) => {
           LENDING_DISBURSEMENT_TRUSTED_OFFER_ISSUERS: fintechIssuer.webId,
         },
         packageName: "@lending/app-disbursement",
+        command: "start",
       }),
     ]);
 
