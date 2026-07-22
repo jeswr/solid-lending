@@ -2,6 +2,7 @@
 
 import { HonestyPanel, ReceiptCard } from "@jeswr/solid-showcase-kit";
 import { useState } from "react";
+import { BASE_PATH } from "../../lib/paths";
 
 interface Receipt {
   iri: string;
@@ -31,7 +32,7 @@ export default function LedgerPage() {
   async function load() {
     setPending(true);
     try {
-      const response = await fetch("/api/ledger");
+      const response = await fetch(`${BASE_PATH}/api/ledger`);
       const body = (await response.json()) as LedgerResult;
       if (!response.ok) {
         setResult({ error: `HTTP ${response.status}`, detail: JSON.stringify(body) });

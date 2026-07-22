@@ -534,18 +534,27 @@ importers:
       '@lending/app-tour':
         specifier: workspace:*
         version: link:../apps/tour
+      '@lending/data-model':
+        specifier: workspace:*
+        version: link:../packages/data-model
       '@lending/seeds':
         specifier: workspace:*
         version: link:../seeds
       '@lending/test-kit':
         specifier: workspace:*
         version: link:../packages/test-kit
+      '@lending/vc-kit':
+        specifier: workspace:*
+        version: link:../packages/vc-kit
       '@playwright/test':
         specifier: ^1.59.1
         version: 1.61.1
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.5
+      jose:
+        specifier: ^6.0.0
+        version: 6.2.3
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

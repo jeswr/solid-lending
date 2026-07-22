@@ -62,7 +62,9 @@ export default function ApplicationPage() {
             {decision.findings.map((finding) => (
               <li key={finding.code} className="flex justify-between gap-2">
                 <span>{finding.rule}</span>
-                <span className={finding.pass ? "text-emerald-600" : "text-red-600"}>
+                {/* WCAG AA text contrast needs >=4.5:1; emerald-600 on this
+                    background measures ~3.5:1, so use emerald-700. */}
+                <span className={finding.pass ? "text-emerald-700" : "text-red-600"}>
                   {finding.observed} ({finding.threshold})
                 </span>
               </li>

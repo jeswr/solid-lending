@@ -9,13 +9,16 @@
   },
   "devDependencies": {
     "@lending/app-tour": "workspace:*",
+    "@lending/data-model": "workspace:*",
     "@lending/seeds": "workspace:*",
     "@lending/test-kit": "workspace:*",
+    "@lending/vc-kit": "workspace:*",
     "@axe-core/playwright": "^4.12.1",
     "@jeswr/solid-showcase": "^0.1.0",
     "@jeswr/solid-showcase-kit": "^0.1.0",
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.9.2",
+    "jose": "^6.0.0",
     "typescript": "^6.0.3"
   }
 }
