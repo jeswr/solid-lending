@@ -18,7 +18,31 @@ const ALLOWLIST = [
   "https://turborepo.dev/schema.json", // turbo.json $schema
   "https://biomejs.dev/schemas/", // biome.json $schema
   "https://json.schemastore.org/", // tsconfig $schema
+  "https://www.consumerfinance.gov/", // CFPB regulation citations — real pages, but the CFPB WAF returns 403 to automated/datacenter (CI) requests; verified reachable in a browser
 ];
+
+/**
+ * RFC 2606 / RFC 6761 reserved names. Demo-persona WebIDs and SPARQL example
+ * subjects use these deliberately (e.g. `https://maya.pod.example/...`) — they
+ * are guaranteed never to resolve and must NOT be dereference-checked.
+ */
+function isReservedExampleHost(iri) {
+  let host;
+  try {
+    host = new URL(iri).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return (
+    host === "example.com" ||
+    host === "example.net" ||
+    host === "example.org" ||
+    host.endsWith(".example") ||
+    host.endsWith(".invalid") ||
+    host.endsWith(".test") ||
+    host.endsWith(".localhost")
+  );
+}
 
 const CACHE_PATH = ".cache/lint-iris.json";
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -37,7 +61,9 @@ for (const file of files) {
   if (!existsSync(file)) continue;
   for (const match of readFileSync(file, "utf8").matchAll(IRI_RE)) {
     const iri = match[0].replace(/[.,;:]+$/, "");
-    if (!ALLOWLIST.some((prefix) => iri.startsWith(prefix))) iris.add(iri);
+    if (ALLOWLIST.some((prefix) => iri.startsWith(prefix))) continue;
+    if (isReservedExampleHost(iri)) continue;
+    iris.add(iri);
   }
 }
 
