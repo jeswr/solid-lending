@@ -687,6 +687,12 @@ test("scene 3: cash-flow lender APPROVES with a real signed Reg Z offer; bureau-
   await walletGrant("bank-lender", "identity", "grant");
   await walletGrant("bank-lender", "income", "grant");
   await walletGrant("bank-lender", "creditScore", "grant");
+  // A resource-level WRITE grant on bank-lender's OWN Reg B adverse-action
+  // notice — WAC evaluates the CREATE of `/lending/adverse-action` against
+  // the pod, and bank-lender's service identity is granted NOTHING directly
+  // in this suite's beforeAll (every byte of its access flows through a real
+  // wallet grant, same as fintech-lender's `loanOffer` write target above).
+  await walletGrant("bank-lender", "adverseAction", "grant");
 
   // Before either lender is granted, an unauthenticated submit is refused.
   expect(

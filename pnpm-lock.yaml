@@ -1737,7 +1737,7 @@ packages:
     engines: {node: '>=22.12'}
 
   '@jeswr/solid-pod-guard@file:vendor/jeswr-solid-pod-guard-0.1.0.tgz':
-    resolution: {integrity: sha512-CM6a1OAdgMlf5oX57Rt6n0N4mD6Aexj/q7V+9NbkHJUeNgwad0Voq2fP+RKt4jRn1VkdCY0S05k4b90qbajWnw==, tarball: file:vendor/jeswr-solid-pod-guard-0.1.0.tgz}
+    resolution: {integrity: sha512-Cm4SCWiTu/k6QbXG14bKlTH5ETzB2MtIO5BzCEijNBjtUnVug9lWfjt55xUk/GNSdPxTXy+DaNTTmRuBXAwfyA==, tarball: file:vendor/jeswr-solid-pod-guard-0.1.0.tgz}
     version: 0.1.0
     engines: {node: '>=22.12'}
 

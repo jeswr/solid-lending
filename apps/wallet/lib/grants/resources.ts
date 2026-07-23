@@ -15,6 +15,15 @@
  * this app itself writes, see `./odrl.ts`) with no data-model shape — it is
  * additional pod content the credential/data-model layer does not know about,
  * the same way the ACL documents it sits beside are not "lending resources".
+ * The bank-lender adverse-action notice is likewise NOT a data-model shape —
+ * it is `apps/bank-lender/lib/server/origination.ts`'s own Reg B document
+ * (`ADVERSE_ACTION_POD_PATH`, mirrored here as a literal — no cross-app
+ * import exists between sibling apps). A resource-level WRITE grant is the
+ * ONLY way bank-lender's service identity may create it: the journey
+ * beforeAll deliberately grants bank-lender NOTHING directly (every byte of
+ * its access flows through a real wallet grant), so scene 3 grants this
+ * resource exactly like fintech-lender's `loanOffer` write target before
+ * submitting.
  */
 import { RESOURCE_POD_PATHS } from "@lending/data-model";
 
@@ -28,6 +37,7 @@ export const RESOURCE_IDS = [
   "disbursementReceipt",
   "repaymentHistory",
   "repaymentAuthorization",
+  "adverseAction",
 ] as const;
 
 export type ResourceId = (typeof RESOURCE_IDS)[number];
@@ -38,6 +48,11 @@ export function isResourceId(value: string): value is ResourceId {
 
 /** The wallet-authored repayment-authorization document (not a data-model shape). */
 export const REPAYMENT_AUTHORIZATION_PATH = "/lending/repayment-authorization";
+
+/** The bank-lender-authored Reg B adverse-action notice — mirrors
+ * `apps/bank-lender/lib/server/origination.ts`'s `ADVERSE_ACTION_POD_PATH`
+ * (no cross-app import; see this module's header). */
+export const BANK_ADVERSE_ACTION_PATH = "/lending/adverse-action";
 
 export interface ResourceDefinition {
   readonly id: ResourceId;
@@ -102,6 +117,12 @@ export const RESOURCE_CATALOG: Readonly<Record<ResourceId, ResourceDefinition>> 
     id: "repaymentAuthorization",
     path: REPAYMENT_AUTHORIZATION_PATH,
     label: "Repayment authorization (ODRL, 12 CFR 1041 rails)",
+    isCredential: false,
+  },
+  adverseAction: {
+    id: "adverseAction",
+    path: BANK_ADVERSE_ACTION_PATH,
+    label: "Reg B adverse-action notice (bank-lender)",
     isCredential: false,
   },
 };
