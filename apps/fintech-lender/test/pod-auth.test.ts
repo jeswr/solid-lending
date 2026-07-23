@@ -31,7 +31,7 @@ import {
   type SolidTestAccount,
   type SolidTestServer,
 } from "@lending/test-kit";
-import { generateKeyPairForSuite, issueCredential } from "@lending/vc-kit";
+import { exportPrivateJwk, generateKeyPairForSuite, issueCredential } from "@lending/vc-kit";
 import { DataFactory, Parser, Store } from "n3";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { FintechLenderConfig } from "../lib/server/config";
@@ -203,20 +203,33 @@ beforeAll(async () => {
     (role) => `${podRoot}${role.docPath}`,
   );
 
+  const fintechLenderWebId = "https://fintech-lender.example/orgs/installment-lending#id";
+  const lenderVerificationMethod = `${fintechLenderWebId.split("#")[0]}#vc-key`;
+  const lenderKey = await generateKeyPairForSuite(lenderVerificationMethod, "Ed25519");
+  const lenderKeyJwk = await exportPrivateJwk(lenderKey);
+
   config = {
     allowedPodOrigins: [podRoot],
     allowInsecureLoopback: true,
-    fintechLenderWebId: "https://fintech-lender.example/orgs/installment-lending#id",
+    fintechLenderWebId,
+    issuerKeyJwk: JSON.stringify(lenderKeyJwk),
+    issuerKeyVerificationMethod: lenderVerificationMethod,
     podServiceClientId: CLIENT.clientId,
     podServiceClientSecret: CLIENT.clientSecret,
     podServiceIssuer: serviceIssuer.issuer,
+    statusListUrl: `${podRoot}/lending/status/fintech-repayment`,
     serviceWebId: serviceIssuer.webId,
     trustedAnchorIssuers: [],
     trustedCredentialIssuers,
     trustedOidcIssuers: [presenter.issuer],
     trustForwardedHeaders: false,
   };
-  service = createPodRailService({ config, now: () => NOW, ownerSeams: OWNER_SEAMS });
+  service = createPodRailService({
+    config,
+    now: () => NOW,
+    ownerSeams: OWNER_SEAMS,
+    publicRequestUrl: (request) => request.url,
+  });
   route = await serveHandler((request) => {
     const url = new URL(request.url);
     if (url.pathname.endsWith("/application/submit")) return service.applicationSubmit(request);
@@ -245,6 +258,7 @@ describe("boundary rejections", () => {
 
   test("an unconfigured service identity fails closed (503) — never anonymous IO", async () => {
     const unconfigured = createPodRailService({
+      publicRequestUrl: (request) => request.url,
       config: { ...config, podServiceClientSecret: undefined },
       now: () => NOW,
       ownerSeams: OWNER_SEAMS,
@@ -264,6 +278,7 @@ describe("boundary rejections", () => {
 describe("the grant boundary is the pod's own WAC", () => {
   test("a service identity the grant does not name is denied by the pod — no offer written", async () => {
     const rogue = createPodRailService({
+      publicRequestUrl: (request) => request.url,
       config: {
         ...config,
         podServiceClientId: ROGUE_CLIENT.clientId,

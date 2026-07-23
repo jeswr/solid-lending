@@ -2,6 +2,7 @@
 
 import { CredentialCard, type CredentialStatus, HonestyPanel } from "@jeswr/solid-showcase-kit";
 import { useState } from "react";
+import { BASE_PATH } from "../../lib/paths";
 
 interface CredentialSummary {
   id: string;
@@ -33,7 +34,7 @@ export default function CredentialsPage() {
   async function load() {
     setPending(true);
     try {
-      const response = await fetch("/api/dev/credentials");
+      const response = await fetch(`${BASE_PATH}/api/dev/credentials`);
       const body = (await response.json()) as CredentialsResult;
       setResult(body);
     } catch (error) {

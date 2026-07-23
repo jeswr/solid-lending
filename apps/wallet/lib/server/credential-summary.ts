@@ -88,16 +88,60 @@ function statusLabelFor(
   return "revoked";
 }
 
+/**
+ * Milliseconds before a pod fetch (credential document, issuer WebID
+ * document, or Bitstring status list) is abandoned and treated as
+ * unreachable. Verify-on-view is a fail-closed gate chain (see the module
+ * header) — an unreachable dependency must fail the credential CLOSED and
+ * PROMPTLY, never hang the route indefinitely (Node's/undici's default
+ * `fetch` has no idle timeout of its own).
+ */
+const POD_FETCH_TIMEOUT_MS = 15_000;
+
+/** Wrap a `fetch` so every call is bounded by {@link POD_FETCH_TIMEOUT_MS} —
+ * used for both the credential-document GET below and the `webIdFetch`/
+ * `statusFetch` seams handed to `verifyCredential` (key resolution + status
+ * list resolution), so a stalled loopback pod fails this credential closed
+ * instead of hanging the whole route. */
+function withPodFetchTimeout(fetchImpl: typeof fetch): typeof fetch {
+  return (async (input, init) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), POD_FETCH_TIMEOUT_MS);
+    try {
+      return await fetchImpl(input, { ...init, signal: init?.signal ?? controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  }) as typeof fetch;
+}
+
+/** Plain (unauthenticated) reads: the issuer WebID document and status list
+ * are ALWAYS public-read (`publicReadAcl`, same as the seeder's own issuer
+ * seats) — no wallet identity is needed for either. */
+const publicPodFetch = withPodFetchTimeout(fetch);
+
 export async function readCredentialSummaries(options: {
   readonly podBase: string;
   readonly now: Date;
+  /**
+   * The wallet's OWN service-identity fetch — REQUIRED to read the
+   * credential documents themselves: the pod runs real Solid-OIDC + DPoP
+   * verification (never an unauthenticated-owner bypass), and each
+   * credential's ACL grants `wallet-service` (this identity) Read/Write/
+   * Control explicitly (see `journey.spec.ts`'s `seededCredentialAgents`
+   * ACL provisioning, and this app's own `wallet-grant-service.ts`'s
+   * identical `createServicePodFetch` seam). Still timeout-bounded (see
+   * `POD_FETCH_TIMEOUT_MS`) — a stalled read fails this credential closed.
+   */
+  readonly podFetch: typeof fetch;
 }): Promise<readonly CredentialSummary[]> {
+  const credentialFetch = withPodFetchTimeout(options.podFetch);
   return Promise.all(
     SUMMARY_CREDENTIALS.map(async (entry) => {
       const iri = `${options.podBase}${entry.path.slice(1)}`;
       const issuer = `${options.podBase}${ISSUER_ROLES[entry.issuerRole].docPath.slice(1)}`;
       try {
-        const response = await fetch(iri);
+        const response = await credentialFetch(iri);
         if (!response.ok) {
           return {
             id: entry.id,
@@ -111,13 +155,17 @@ export async function readCredentialSummaries(options: {
         // Explicit plain fetch: solid-vc's DEFAULT webId/status resolver is
         // SSRF-guarded and refuses loopback http outright, with no config
         // knob reaching it from here — this dev-seeded pod is plain loopback
-        // http by design (see `./prequal-service.ts`'s identical note).
+        // http by design (see `./prequal-service.ts`'s identical note). Both
+        // targets are public-read (see `publicPodFetch`'s note), so no
+        // wallet identity is needed — only bounded so an unreachable
+        // document fails this credential closed within
+        // `POD_FETCH_TIMEOUT_MS`, never hangs the route.
         const outcome = await verifyCredential(turtle, {
           expectShape: entry.kind,
           now: options.now,
           trustedIssuers: [issuer],
-          webIdFetch: fetch,
-          statusFetch: fetch,
+          webIdFetch: publicPodFetch,
+          statusFetch: publicPodFetch,
         });
         return {
           id: entry.id,

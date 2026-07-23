@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BASE_PATH } from "../../../lib/paths";
 
 interface SeedResult {
   persona: string;
@@ -28,7 +29,7 @@ export default function DevSeedPage() {
     setPending(true);
     setResult(undefined);
     try {
-      const response = await fetch("/api/dev/seed", { method: "POST" });
+      const response = await fetch(`${BASE_PATH}/api/dev/seed`, { method: "POST" });
       const body = (await response.json()) as SeedResult | SeedError;
       setResult(body);
     } catch (error) {

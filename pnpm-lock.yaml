@@ -534,18 +534,27 @@ importers:
       '@lending/app-tour':
         specifier: workspace:*
         version: link:../apps/tour
+      '@lending/data-model':
+        specifier: workspace:*
+        version: link:../packages/data-model
       '@lending/seeds':
         specifier: workspace:*
         version: link:../seeds
       '@lending/test-kit':
         specifier: workspace:*
         version: link:../packages/test-kit
+      '@lending/vc-kit':
+        specifier: workspace:*
+        version: link:../packages/vc-kit
       '@playwright/test':
         specifier: ^1.59.1
         version: 1.61.1
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.5
+      jose:
+        specifier: ^6.0.0
+        version: 6.2.3
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1728,7 +1737,7 @@ packages:
     engines: {node: '>=22.12'}
 
   '@jeswr/solid-pod-guard@file:vendor/jeswr-solid-pod-guard-0.1.0.tgz':
-    resolution: {integrity: sha512-CM6a1OAdgMlf5oX57Rt6n0N4mD6Aexj/q7V+9NbkHJUeNgwad0Voq2fP+RKt4jRn1VkdCY0S05k4b90qbajWnw==, tarball: file:vendor/jeswr-solid-pod-guard-0.1.0.tgz}
+    resolution: {integrity: sha512-Cm4SCWiTu/k6QbXG14bKlTH5ETzB2MtIO5BzCEijNBjtUnVug9lWfjt55xUk/GNSdPxTXy+DaNTTmRuBXAwfyA==, tarball: file:vendor/jeswr-solid-pod-guard-0.1.0.tgz}
     version: 0.1.0
     engines: {node: '>=22.12'}
 

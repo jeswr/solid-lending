@@ -2,6 +2,7 @@
 
 import { HonestyPanel, StatCard } from "@jeswr/solid-showcase-kit";
 import { useState } from "react";
+import { BASE_PATH } from "../../lib/paths";
 
 interface ProveResult {
   verified?: boolean;
@@ -25,7 +26,9 @@ export default function PreQualPage() {
     setPending(true);
     setResult(undefined);
     try {
-      const challengeResponse = await fetch("/api/dev/prequal/challenge", { method: "POST" });
+      const challengeResponse = await fetch(`${BASE_PATH}/api/dev/prequal/challenge`, {
+        method: "POST",
+      });
       const challenge = (await challengeResponse.json()) as {
         sessionKey?: string;
         nonce?: string;
@@ -40,7 +43,7 @@ export default function PreQualPage() {
         setResult({ error: challenge.error, detail: challenge.detail });
         return;
       }
-      const proveResponse = await fetch("/api/dev/prequal/prove", {
+      const proveResponse = await fetch(`${BASE_PATH}/api/dev/prequal/prove`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ sessionKey: challenge.sessionKey, nonce: challenge.nonce }),

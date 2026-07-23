@@ -32,6 +32,7 @@ import type { FintechLenderConfig } from "./config";
 import { notConfigured, requiredConfig } from "./config";
 import { furnishRepaymentHistory, readRepaymentGrant } from "./servicing";
 import { runOrigination } from "./origination";
+import { publicRequestUrl as defaultPublicRequestUrl } from "./url";
 
 export interface PodRailServiceOptions {
   readonly config: FintechLenderConfig;
@@ -49,6 +50,8 @@ export interface PodRailServiceOptions {
    * applied, so it injects a plain fetch here instead.
    */
   readonly ownerSeams?: OwnerBindingSeams;
+  /** Public-URL reconstruction for the DPoP `htu` binding. Defaults to this app's basePath. */
+  readonly publicRequestUrl?: (request: Request) => string;
 }
 
 export interface PodRailService {
@@ -77,6 +80,7 @@ export function createPodRailService(options: PodRailServiceOptions): PodRailSer
     options.guard ??
     createPodRouteGuard({
       config,
+      publicRequestUrl: options.publicRequestUrl ?? defaultPublicRequestUrl,
       ...(options.ownerSeams !== undefined ? { ownerSeams: options.ownerSeams } : {}),
     });
 

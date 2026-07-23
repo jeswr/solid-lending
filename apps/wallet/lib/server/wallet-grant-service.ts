@@ -33,6 +33,7 @@ import {
 } from "../grants/parties";
 import { isResourceId, RESOURCE_CATALOG, type ResourceId } from "../grants/resources";
 import { configuredAgent, requiredConfig, type WalletGrantConfig } from "./config";
+import { publicRequestUrl as defaultPublicRequestUrl } from "./url";
 
 export interface WalletGrantServiceOptions {
   readonly config: WalletGrantConfig;
@@ -41,6 +42,8 @@ export interface WalletGrantServiceOptions {
   readonly podFetch?: PodIoFetch;
   readonly serviceWebId?: string;
   readonly now?: () => Date;
+  /** Public-URL reconstruction for the DPoP `htu` binding. Defaults to this app's basePath. */
+  readonly publicRequestUrl?: (request: Request) => string;
 }
 
 export interface WalletGrantService {
@@ -85,7 +88,12 @@ function badRequest(detail: string): Response {
 
 export function createWalletGrantService(options: WalletGrantServiceOptions): WalletGrantService {
   const { config } = options;
-  const guard = options.guard ?? createPodRouteGuard({ config: config.guard });
+  const guard =
+    options.guard ??
+    createPodRouteGuard({
+      config: config.guard,
+      publicRequestUrl: options.publicRequestUrl ?? defaultPublicRequestUrl,
+    });
 
   let engine: GrantEngineOptions | undefined;
   const engineOptions = (): GrantEngineOptions | Response => {

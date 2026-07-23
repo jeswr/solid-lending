@@ -8,7 +8,10 @@
  *  - `bank-lender` (Fifth Third-modelled): bureau-only contrast decision —
  *    identity + income + the bureau credit-score credential. Never the
  *    cash-flow credentials — it deliberately never sees them (design §6
- *    scene-3 "two models" beat).
+ *    scene-3 "two models" beat). Also a write grant on its OWN Reg B
+ *    adverse-action notice (`adverseAction`) — the ONLY way its service
+ *    identity may create that resource, since the journey's beforeAll grants
+ *    it nothing directly (see `resources.ts`'s header).
  *  - `fintech-lender` (Oportun-modelled): the winning cash-flow-underwriting
  *    lender — every credential for prefill, write access to write its Reg Z
  *    loan-offer and repayment-history documents back into the pod, plus the
@@ -54,6 +57,7 @@ export const GRANT_PARTIES: Readonly<Record<GrantPartyId, GrantPartyDefinition>>
       { resource: "identity", write: false },
       { resource: "income", write: false },
       { resource: "creditScore", write: false },
+      { resource: "adverseAction", write: true },
     ],
   },
   "fintech-lender": {

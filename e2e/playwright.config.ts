@@ -14,6 +14,12 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: ".",
   globalSetup: "./support/global-setup.ts",
+  // The journey suite drives six real `next dev` cold starts: the FIRST hit
+  // of any route pays a Turbopack compile (several seconds) on top of real
+  // DPoP/crypto round trips — comfortably over the 5s Playwright default.
+  // Individual assertions still bump further where warranted (documented
+  // inline in journey.spec.ts).
+  expect: { timeout: 20_000 },
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
   },

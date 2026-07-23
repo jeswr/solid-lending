@@ -3,6 +3,7 @@
 import { HonestyPanel } from "@jeswr/solid-showcase-kit";
 import { useState } from "react";
 import { GRANT_PARTIES, GRANT_PARTY_IDS, type GrantPartyId } from "../../lib/grants/parties";
+import { BASE_PATH } from "../../lib/paths";
 import { RESOURCE_CATALOG, type ResourceId } from "../../lib/grants/resources";
 
 interface Standing {
@@ -45,7 +46,7 @@ export default function GrantsPage() {
   async function refresh() {
     setPending("refresh");
     try {
-      const response = await fetch("/api/grants");
+      const response = await fetch(`${BASE_PATH}/api/grants`);
       const body = (await response.json()) as GrantsResult;
       if (!response.ok) {
         setResult({ error: `HTTP ${response.status}`, detail: JSON.stringify(body) });
@@ -63,7 +64,7 @@ export default function GrantsPage() {
     setPending(`${party}:${resource}:${action}`);
     setMessage(undefined);
     try {
-      const response = await fetch("/api/grants/change", {
+      const response = await fetch(`${BASE_PATH}/api/grants/change`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ party, resource, action }),

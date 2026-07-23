@@ -4,11 +4,17 @@
  * asserted copy can never drift), the consent interstitial, and axe (WCAG 2.1 AA)
  * on the landing + every chapter page.
  */
-import walkthroughJson from "@lending/app-tour/content/walkthrough.json";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { documentDisclaimerPack, parseWalkthrough } from "@jeswr/solid-showcase";
 import { disclaimerAssertions } from "@jeswr/solid-showcase-kit/testing";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+
+const walkthroughPath = fileURLToPath(
+  new URL("../apps/tour/content/walkthrough.json", import.meta.url),
+);
+const walkthroughJson = JSON.parse(readFileSync(walkthroughPath, "utf8")) as unknown;
 
 const doc = parseWalkthrough(walkthroughJson);
 const pack = documentDisclaimerPack(doc);

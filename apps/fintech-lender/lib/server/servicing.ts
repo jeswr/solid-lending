@@ -6,16 +6,13 @@
  * the pod (the granted read, same service identity, same fail-closed
  * boundary as origination) rather than re-deriving loan terms.
  */
-import {
-  buildRepaymentHistoryCredential,
-  LoanOfferCredential,
-  RESOURCE_POD_PATHS,
-  resourceToTurtle,
-  validate,
-} from "@lending/data-model";
+import { LoanOfferCredential, RESOURCE_POD_PATHS, validate } from "@lending/data-model";
 import { PodAccessError } from "@jeswr/solid-pod-guard";
+import type { IssuedCredential } from "@lending/vc-kit";
+import { issueCredential } from "@lending/vc-kit";
 import { DataFactory } from "n3";
 import type { FintechLenderConfig } from "./config";
+import { ensureFintechStatusList, fintechIssuerRuntime } from "./issuer-runtime";
 import { assertAllowedPodBase, readPodResource, writePodTurtle } from "./pod-io";
 
 /** 12 CFR 1041 subpart C, quoted exactly — the scene-5 payment-provision anchor. */
@@ -41,6 +38,13 @@ export interface RepaymentGrantView {
 
 export interface ServicingIo {
   readonly podFetch: typeof fetch;
+  /** Injected in tests: hosts this lender's own signed status list. Defaults to {@link podFetch}. */
+  readonly statusHostFetch?: typeof fetch;
+}
+
+/** `xsd:date` lexical, `YYYY-MM-DD`, from a `Date` (UTC — no locale ambiguity). */
+function dateLexical(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 async function readOffer(
@@ -110,6 +114,14 @@ export interface FurnishHistoryReport {
   readonly onTimePaymentCount: number;
   readonly latePaymentCount: number;
   readonly scheduledPaymentCount: number;
+  /**
+   * The signed Turtle body of the just-written Repayment-History VC. The
+   * bureau's `/api/furnish` intake requires `credentialSubject ==` the
+   * AUTHENTICATED caller presenting it (never this lender's own service
+   * identity) — so the borrower's OWN session furnishes this onward, not
+   * this rail. Returned here for exactly that handoff.
+   */
+  readonly credential: string;
 }
 
 /**
@@ -132,7 +144,6 @@ export async function furnishRepaymentHistory(
 
   const base = assertAllowedPodBase(pod, config);
   const historyIri = `${base}${RESOURCE_POD_PATHS["repayment-history-credential"].slice(1)}`;
-  const statusListIri = `${new URL(config.fintechLenderWebId).origin}/status/repayment`;
   const periodStart = offer.validFrom;
   // The furnished period covers the loan's full scheduled term (the demo's
   // "eighteen on-time payments" graduation beat collapses into one click) —
@@ -141,25 +152,38 @@ export async function furnishRepaymentHistory(
   const DAY_MS = 24 * 60 * 60 * 1000;
   const periodEnd = new Date(periodStart.getTime() + scheduledPaymentCount * 30 * DAY_MS);
 
-  const built = buildRepaymentHistoryCredential({
-    credentialStatus: `${statusListIri}#${webid.length}-${options.now.getTime() % 100000}`,
-    credentialSubject: webid,
-    iri: historyIri,
-    issuer: config.fintechLenderWebId,
-    latePaymentCount,
-    onTimePaymentCount,
-    periodEnd,
-    periodStart,
-    scheduledPaymentCount,
-    servicedLoan: offerIri,
-    validFrom: options.now,
-    validUntil: new Date(options.now.getTime() + 28 * DAY_MS),
+  const statusHostFetch = io.statusHostFetch ?? io.podFetch;
+  const runtime = await fintechIssuerRuntime(config, statusHostFetch);
+  await ensureFintechStatusList(runtime, statusHostFetch, options.now);
+  const statusIndex = runtime.allocator.allocate(historyIri);
+
+  const issued: IssuedCredential = await issueCredential({
+    claims: {
+      kind: "repayment-history-credential",
+      latePaymentCount,
+      onTimePaymentCount,
+      periodEnd: dateLexical(periodEnd),
+      periodStart: dateLexical(periodStart),
+      scheduledPaymentCount,
+      servicedLoan: offerIri,
+    },
+    credentialId: historyIri,
+    issuer: runtime.issuerWebId,
+    key: runtime.key,
+    kind: "repayment-history-credential",
+    status: runtime.statusList.entry(statusIndex),
+    subject: webid,
+    validity: {
+      validFrom: options.now,
+      validUntil: new Date(options.now.getTime() + 28 * DAY_MS),
+    },
   });
-  const turtle = await resourceToTurtle(built);
+
   const existing = await readPodResource(historyIri, base, io.podFetch);
-  await writePodTurtle(historyIri, turtle, { existing, podFetch: io.podFetch });
+  await writePodTurtle(historyIri, issued.body, { existing, podFetch: io.podFetch });
 
   return {
+    credential: issued.body,
     historyIri,
     latePaymentCount,
     onTimePaymentCount,

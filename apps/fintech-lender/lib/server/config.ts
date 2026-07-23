@@ -53,6 +53,12 @@ export interface FintechLenderConfig extends PodGuardConfig {
   readonly podServiceClientId: string | undefined;
   /** Confidential client secret for the service identity (server env only — never bundled). */
   readonly podServiceClientSecret: string | undefined;
+  /** This lender's private signing key (JWK, server env only — never bundled): signs the loan-offer AND repayment-history VCs it writes. */
+  readonly issuerKeyJwk: string | undefined;
+  /** Verification method IRI for {@link issuerKeyJwk}. Defaults to `${fintechLenderWebId's doc}#vc-key`. */
+  readonly issuerKeyVerificationMethod: string | undefined;
+  /** This lender's own hosted Bitstring status list URL. */
+  readonly statusListUrl: string | undefined;
 }
 
 function splitList(value: string | undefined): readonly string[] {
@@ -72,10 +78,13 @@ export function configFromEnv(env: NodeJS.ProcessEnv = process.env): FintechLend
   return {
     ...base,
     fintechLenderWebId: env.LENDING_FINTECH_LENDER_WEBID?.trim() || DEFAULT_FINTECH_LENDER_WEBID,
+    issuerKeyJwk: env.LENDING_FINTECH_ISSUER_KEY_JWK,
+    issuerKeyVerificationMethod: env.LENDING_FINTECH_ISSUER_KEY_VM,
     podServiceClientId: env.LENDING_FINTECH_POD_SERVICE_CLIENT_ID,
     podServiceClientSecret: env.LENDING_FINTECH_POD_SERVICE_CLIENT_SECRET,
     podServiceIssuer: env.LENDING_FINTECH_POD_SERVICE_ISSUER,
     serviceWebId: env.LENDING_FINTECH_SERVICE_WEBID,
+    statusListUrl: env.LENDING_FINTECH_STATUS_LIST_URL,
     trustedAnchorIssuers: splitList(env.LENDING_TRUSTED_ANCHOR_ISSUERS),
     trustedCredentialIssuers: splitList(env.LENDING_TRUSTED_CREDENTIAL_ISSUERS),
   };
