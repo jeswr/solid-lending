@@ -13,7 +13,13 @@ import { readFileSync } from "node:fs";
 import { scanInsigniaTree } from "@jeswr/solid-showcase-kit/testing";
 
 const DOCUMENT = "apps/tour/content/walkthrough.json";
-const SCANNED = ["apps", "packages", "seeds", "e2e", "docs"];
+// Insignia guard covers RENDERED / branded surfaces only (decision 0002) — the
+// app trees, shared UI, seeds, and e2e. `docs/` is deliberately EXCLUDED: the
+// use-case / design / research docs name the real-world stakeholders they model
+// BY DESIGN, each under the "illustrative — not affiliated" concept-demo framing
+// (naming a modelled-on org is disclosure, not impersonation). This matches the
+// solid-mortgage insignia guard, which scans app/ui surfaces only.
+const SCANNED = ["apps", "packages", "seeds", "e2e"];
 
 const doc = JSON.parse(readFileSync(DOCUMENT, "utf8"));
 const bannedMarks = doc.branding?.bannedMarks ?? [];
