@@ -6,6 +6,16 @@ import type { NextConfig } from "next";
  */
 const nextConfig: NextConfig = {
   basePath: "/verifications",
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/verifications",
+        permanent: false,
+        basePath: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

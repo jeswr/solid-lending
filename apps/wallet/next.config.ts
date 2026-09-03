@@ -6,6 +6,16 @@ import type { NextConfig } from "next";
  */
 const nextConfig: NextConfig = {
   basePath: "/wallet",
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/wallet",
+        permanent: false,
+        basePath: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

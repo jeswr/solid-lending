@@ -6,6 +6,16 @@ import type { NextConfig } from "next";
  */
 const nextConfig: NextConfig = {
   basePath: "/bureau",
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/bureau",
+        permanent: false,
+        basePath: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

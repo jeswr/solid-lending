@@ -20,6 +20,16 @@ import type { NextConfig } from "next";
  */
 const nextConfig: NextConfig = {
   basePath: "/fintech-lender",
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/fintech-lender",
+        permanent: false,
+        basePath: false,
+      },
+    ];
+  },
   serverExternalPackages: [
     "@aztec/bb.js",
     "@noir-lang/noir_js",
