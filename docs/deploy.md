@@ -4,6 +4,18 @@ One shared domain, N zone apps behind the shell's rewrites (the browser-storage
 partitioning constraint), one Vercel project per app from this single monorepo.
 These are hard-won learnings — read them BEFORE creating any project.
 
+## Project matrix
+
+| app dir | package | Vercel project | production URL |
+|---|---|---|---|
+| `apps/tour` | `@lending/app-tour` | `solid-lending` | https://solid-lending.vercel.app |
+| `apps/wallet` | `@lending/app-wallet` | `solid-lending-wallet` | https://solid-lending-wallet.vercel.app |
+| `apps/verifications` | `@lending/app-verifications` | `solid-lending-verifications` | https://solid-lending-verifications.vercel.app |
+| `apps/bank-lender` | `@lending/app-bank-lender` | `solid-lending-bank-lender` | https://solid-lending-bank-lender.vercel.app |
+| `apps/fintech-lender` | `@lending/app-fintech-lender` | `solid-lending-fintech-lender` | https://solid-lending-fintech-lender.vercel.app |
+| `apps/bureau` | `@lending/app-bureau` | `solid-lending-bureau` | https://solid-lending-bureau.vercel.app |
+| `apps/disbursement` | `@lending/app-disbursement` | `solid-lending-disbursement` | https://solid-lending-disbursement.vercel.app |
+
 ## Per-app Vercel projects
 
 - **`rootDirectory` = `apps/<slug>`** on EVERY project. A Git-integration
@@ -16,6 +28,9 @@ These are hard-won learnings — read them BEFORE creating any project.
   configuration.
 - `ignoreCommand: npx turbo-ignore --fallback=HEAD^1` means a push rebuilds only
   affected apps.
+- Deploy the complete monorepo from a Git worktree root. This account's Hobby seat
+  blocks CLI deploys that carry an unrecognised checkout commit author; a worktree's
+  `.git` pointer prevents that metadata from being attached.
 
 ## Env matrix
 

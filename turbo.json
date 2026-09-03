@@ -3,6 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": ["LENDING_*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "typecheck": {},
